@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google-site-verification" content="aexITLS38FdIRzwj25OVWxm87rpa9l-UV0URTyC9cTs" />
+  <title>
+    在图像上写入中英文字符串的几个方法
+    
+  </title>
+  <link rel="stylesheet" href="../css/site.css">
+
+  <!-- highlight settings-->
+  <link rel="stylesheet" href="http://yandex.st/highlightjs/7.1/styles/default.min.css">
+<script src="http://yandex.st/highlightjs/7.1/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+  <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+  
+  <link rel="alternate" type="application/atom+xml" title="RSS Feed for Karen's blog" href="/feed.xml" />
+
+  
+
+  
+
+  
+</head>
+<body>
+  <div class="top-bar">
+  </div>
+
+  <div class="header-container">
+    <header class="inner">
+      
+      <nav>
+        <a class="" href="/">About</a>
+        <a class="" href="/project/">Project</a>
+        <!--<a class="" href="/resume/">Resume</a>-->
+        <!--<a href="/resume/">Resume</a>-->
+        <a class="" href="/publication/">Publication</a>
+        <a class="" href="/blog/">Blog</a>
+        <a href="/reading/">Reading</a>
+        <!--<a class=" contact" href="/contact/">Contact</a>-->
+        <a href="https://github.com/yyjiang">Github</a>
+      </nav>
+      
+      
+      <div class="pull-right right logo">
+        <div class="name">
+          <a href="/">Karen</a><br />
+          <small>
+            <em>
+              
+                <a href="/">Keep Going</a>
+              
+            </em>
+          </small>
+        </div>
+        <img class="avatar" src="/images/photo.jpg" alt="My profile picture" />
+      </div>
+      <div class="clear"></div>
+    </header>
+    <div class="clear"></div>
+  </div>
+
+  <!--添加侧边菜单-->
+<!--link rel="stylesheet" href="/css/side-menu.css" />
+ <style>
+        .side-menu {
+            width: 200px;
+            top: 150px;
+            right: 0;
+        }
+ </style>
+<script type="text/javascript" src="/js/jquery.min.js"></script>
+<script type="text/javascript" src="/js/jquery.side.menu.js"></script>
+<script>
+$(function () {
+            $('#main').sideMenu({
+                hs: ['h2']
+            });
+        });
+</script>-->
+
+
+
+<article>
+  <h1 class="inner">
+    在图像上写入中英文字符串的几个方法
+  </h1>
+
+  <p class="meta">30 Sep 2015</p>
+
+  
+  
+  <div id="menu"></div>
+  <div id="main" class="span9">
+  <div class="post">
+    <p>图像处理过程中为了显示结果，可能需要在图像上显示文字。
+基于C/C++语言的可以使用opencv的<code>putText</code>函数完成这一功能。opencv自带函数 <code>putText</code> 可以实现往图像上写入文本字符串这一功能。这可以将检测或者识别结果方便地在图像或者视频上标出来。
+基于python语言的可以使用opencv的Python <code>cv2.putText</code>函数以及PIL package中的<code>imageDraw</code>模块。</p>
+
+<ul>
+<li>C++中opencv包渲染文字的函数说明：</li>
+</ul>
+<div class="highlight"><pre><code class="language-text" data-lang="text">C++: void putText(Mat&amp; img, const string&amp; text, Point org, int fontFace, double fontScale, Scalar color, int thickness=1, int lineType=8, bool bottomLeftOrigin=false )
+</code></pre></div>
+<ul>
+<li>python中opencv包渲染文字的函数说明：</li>
+</ul>
+<div class="highlight"><pre><code class="language-text" data-lang="text">Python: cv2.putText(img, text, org, fontFace, fontScale, color[, thickness[, lineType[, bottomLeftOrigin]]]) → None
+</code></pre></div>
+<p><code>putText</code> 将以位置<code>org</code>为左下角，在图像<code>img</code>上渲染字符串<code>text</code>。函数可以指定字体类型、字体大小，字体颜色，粗细，线条类型等参数。</p>
+
+<ul>
+<li>python中PIL包渲染文字的函数说明：</li>
+</ul>
+<div class="highlight"><pre><code class="language-text" data-lang="text">PIL.ImageDraw.Draw.text(xy, text, fill=None, font=None, anchor=None)
+PIL.ImageDraw.Draw.multiline_text(xy, text, fill=None, font=None, anchor=None, spacing=0, align=&quot;left&quot;)
+PIL.ImageDraw.Draw.textsize(text, font=None)
+PIL.ImageDraw.Draw.multiline_textsize(text, font=None, spacing=0)
+</code></pre></div>
+<p><code>PIL.ImageDraw.Draw.text()</code>中的参数<code>xy</code>即类似于<code>putText</code>中的<code>org</code>，用于指定文字位置。不过需要注意的是，<code>xy</code>指定的是左上角坐标，而 <code>org</code>指定的是左下角坐标。</p>
+
+<p>opencv的<code>putText</code>目前支持的字体能够表示英文字母和数字，并不能够表示中文，中文字符串会变成一串问号。PIL可以直接指定字体类型显示中文。</p>
+
+<h1 id="1-opencv与c-环境下方法">1. opencv与C++环境下方法</h1>
+
+<p>网上有人已经基于freetype写了一个支持中文的putText，特此记录一下使用方法。</p>
+
+<ol>
+<li>首先，需要安装<a href="http://www.freetype.org/index.html">freetype</a>。</li>
+</ol>
+
+<blockquote>
+<p>FreeType is a freely available software library to render fonts.</p>
+</blockquote>
+
+<p>我下载的是Freetype 2.6。然后将压缩包置于某一路径（比如~/src）下，解压缩，命令行进入到该解压缩后的文件路径下。</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">cd ~/src/freetype-2.6
+./configure
+make
+make install
+</code></pre></div>
+<p>这就安装好了，freetype的include和lib文件夹分别位于</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">/usr/local/include/freetype2
+/usr/local/lib
+</code></pre></div>
+<p>在使用freetype的时候，需要添加这两个路径添加。</p>
+
+<ol>
+<li><p>然后，下载代码<a href="https://github.com/zhh-cui/i18nText">i18nText</a>。该代码主要内容包含一个<code>i18nText.h</code>头文件和<code>i18nText.cpp</code>，这两个文件实现了一个新的往图像上渲染文字函数<code>i18nText.putText()</code>。</p></li>
+<li><p>最后，开始基于以上基础在Xcode project中往图像上渲染文字。
+project的 Build Settings添加以下：</p>
+
+<ul>
+<li>header search path : /usr/local/include/freetype2</li>
+<li>lib search path : /usr/local/lib</li>
+<li>project名字上右键选择add files to &#39;xxx&#39;，添加/usr/local/lib/libfreetype.6.dylib</li>
+</ul></li>
+</ol>
+
+<p>然后，测试样例如下：</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">    cv::Mat test(200, 400, CV_8UC3, CV_RGB(255, 255, 255));
+    cv::namedWindow(&quot;test&quot;, CV_WINDOW_NORMAL);
+    i18nText i18n;
+    FT_Error success = i18n.setFont(&quot;/System/Library/Fonts/STHeiti Light.ttc&quot;);
+
+    if (success) {
+        std::cout &lt;&lt; &quot;Load fonts successfully.&quot; &lt;&lt; std::endl;
+
+        const wchar_t *msg1 = L&quot;此情可待成追忆&quot;;
+        int num = i18n.putText(test, msg1, cv::Point(100, 80), CV_RGB(0, 0, 255));
+
+
+        const wchar_t *msg2 = L&quot;只是当时已惘然&quot;;
+        num = i18n.putText(test, msg2, cv::Point(100, 150), CV_RGB(255, 0, 0));
+
+    }
+
+    cv::imshow(&quot;test&quot;, test);
+    cv::waitKey(0);
+</code></pre></div>
+<p>其中，首先需要创建一个实例<code>i18nText</code>，然后调用<code>i18nText.setFont()</code>设置字体，接着就可以类似于opencv那样调用<code>i18nText.putText()</code>对图像进行文字渲染了。运行后显示（截图并下采样了的，显示得有点模糊诶）：</p>
+
+<p><img src="../images/posts/chn_text_c.png" alt=""></p>
+
+<h1 id="2-python中pil方法">2. python中PIL方法</h1>
+
+<p>首先得需要安装PIL package。通过pip可以轻松搞定，不过名字并不叫PIL，而是pillow</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">sudo pip install pillow
+</code></pre></div>
+<p>最后，通过指定字体类型，位置等参数就可以完成文字渲染。下面是具体的测试代码</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text"># -*- coding: utf-8 -*-
+from PIL import Image,ImageDraw,ImageFont
+import sys
+
+img = Image.new(&#39;RGB&#39;, (400, 200), (255, 255, 255))
+
+font = ImageFont.truetype(&#39;/System/Library/Fonts/STHeiti Light.ttc&#39;, 24)
+
+draw = ImageDraw.Draw(img)
+
+words_1 = u&#39;此情可待成追忆&#39;
+draw.text((100, 80), words_1, (0, 0, 255), font=font)
+
+words_2 = unicode(&#39;只是当时已惘然&#39;, &#39;utf-8&#39;)
+draw.text((100, 150), words_2, (255, 0, 0), font=font) 
+
+#img.show()
+img.save(&#39;chn_text_python.png&#39;)
+</code></pre></div>
+<p>运行显示结果（没有边框的样子好怪。。。）:</p>
+
+<p><img src="../images/posts/chn_text_python.png" alt=""></p>
+
+<p>对比一下两张显示结果，同样的参数，PIL中的要靠上一点，这也就是坐标位置指定的是左上角而非左下角的缘故。</p>
+
+<p>需要注意的是，新建一张特定大小的纯白图像，在opencv和PIL中指定参数时候顺序并不一样。一张高200像素，宽400像素的图像，在opencv中是(200, 400)，对应于PIL中的(400, 200)。不过在putText和text方法里倒是坐标一致了，都是(横向距离，竖向距离)，即与PIL中相一致。</p>
+
+<h1 id="3-总结">3. 总结</h1>
+
+<ul>
+<li>在python中，只要安装调用PIL的ImageDraw模块即可，简单易操作。不过估计也是要依赖于freetype，这个暂时不太清楚。</li>
+<li>在C++中，需要首先安装freetype，并进行相应设置（include，lib/dylib）。最后在你的工程里包含进i18nText的两个简单文件就可以通过<code>i18nText.putText()</code>来进行中文渲染了。好像是略复杂，没办法啦。</li>
+</ul>
+
+  </div>
+  </div>
+</article>
+
+<section class="comments inner">
+<!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_renren"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+</section>
+
+<section class="post-footer-self-promotion inner">
+  <h3>最近文章</h3>
+  <ul class="posts">
+    
+    <li>
+      <span>07 Oct 2015 &raquo;</span> <a href="/blog/using-opencv-with-Xcode-or-in-command-line.html">在Mac上安装并使用opencv2和opencv3</a>
+    </li>
+    
+    <li>
+      <span>07 Oct 2015 &raquo;</span> <a href="/blog/some-tips-with-Xcode.html">Xcode的一些小使用记录</a>
+    </li>
+    
+    <li>
+      <span>22 Sep 2015 &raquo;</span> <a href="/blog/scene-text-baidu-ocr-api.html">百度OCR企业版API的python调用小代码</a>
+    </li>
+    
+  </ul>
+</section>
+
+<!-- mathjax -->
+<script src="/public/js/bootstrap.min.js"></script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/javascript">
+  $(function(){
+    $("p:has(img), p:has(embed)").css('text-align', 'center');
+    $(".post-wrapper .entry a, .post-content a").not(".more-link.btn").attr('target', '_blank');
+  });
+</script>
+
+<div class="separator"></div>
+<section class="comments inner">
+<!-- Duoshuo Comment BEGIN -->
+	<div class="ds-thread"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"yyjiang"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = 'http://static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		|| document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- Duoshuo Comment END -->
+
+<!-- Disqus Comment BEGIN -->
+  <!--<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'yongyuan'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>-->
+<!-- Disqus Comment END -->
+
+</section>
+
+  <div class="separator"></div>
+
+  <div  style="border-bottom: 1px solid #ddd"></div>
+    <footer>
+    <p class="linkings">
+        Utils: <a href="http://docs.opencv.org/doc/tutorials/tutorials.html">opencv</a>&nbsp&nbsp&nbsp&nbsp<a href="http://scikit-learn.org/stable/index.html">scikit-learn</a>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<a href="http://scikit-image.org/">scikit-image</a>
+    </p>
+    <p>
+      &copy; Karen Jiang, Since Sept. 2015.
+      Powered by <a href="http://jekyllrb.com/">Jekyll</a> |
+      Hosted by <a href="https://github.com">Github Pages</a>. 
+    </p>
+    <ul class="links">
+      <li>
+        <a href="https://github.com/yyjiang" title="See my code on GitHub">
+          <i class="icon-github"></i>
+        </a>
+      </li>	  
+      <li>
+        <a href="https://twitter.com/intent/follow?screen_name=yinyan_jiang" title="Follow me on Twitter">
+          <i class="icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a href="/feed.xml" title="Subscribe to my blog with RSS">
+          <i class="icon-feed"></i>
+        </a>
+      </li>
+    </ul>
+  </footer>
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-67985565-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+    /*!
+     * http://github.com/ssaunier/track-outbound-links
+     * Copyright 2013 Sébastien Saunier
+     * @license MIT
+     */
+    !function(e,t){function n(){for(var n=t.getElementsByTagName("a"),a=[],r=0;r<n.length;++r){var o=n[r];o.host!=e.location.host&&a.push(o)}return a}function a(n){for(var a=n.srcElement||n.target;a&&("undefined"==typeof a.tagName||"a"!=a.tagName.toLowerCase()||!a.href);)a=a.parentNode;a&&a.href&&(e._gaq&&_gaq.push(["_trackEvent","Outbound link","Click",a.href]),(!a.target||a.target.match(/^_(self|parent|top)$/i))&&(setTimeout(function(){t.location.href=a.href},150),n.preventDefault?n.preventDefault():n.returnValue=!1))}e.addEventListener("load",function(){var e=n();for(var t in e)e[t].addEventListener("click",a)})}(window,document);
+    var links = document.links;
+    for (var i = 0, linksLength = links.length; i < linksLength; i++) {
+       if (links[i].hostname != window.location.hostname) { links[i].target = '_blank'; }
+    }
+
+    /*
+     * Detect if we are included in an iframe => move.
+     */
+    if (window.top !== window.self
+        && !window.self.location.href.match(/headsha\.re/))
+    {
+      window.top.location.replace(window.self.location.href);
+    }
+  </script>
+
+
+</body>
+</html>

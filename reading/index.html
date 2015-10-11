@@ -1,0 +1,59 @@
+---
+layout: simplePage
+title: Reading - Karen
+description: Karen's douban reading information.
+category: reading
+---
+
+<link rel="stylesheet" href="../css/bootstrap.min.css">
+
+<script type="text/javascript"  src="../js/jquery.min.js"></script>
+<script type="text/javascript"  src="../js/douban.api.js"></script>
+<style>
+.main{padding-right:0;}
+.douban-title{color:#1BAF69;margin-bottom:-20px;text-shadow:0 0 1px;letter-spacing:3px;}
+.douban-list ul li{list-style:none outside none;width:115px;margin-top:20px;float:left;}
+.douban-list ul li img{width:90px;height:120px;border:solid 1px #DDD;padding:1px;}
+.clear{clear:both;}@media (max-width:875px){.douban-title{letter-spacing:1px;margin-bottom:-15px;}
+.douban-list ul li{width:100px;margin-top:5px;}}
+</style>
+<div class="container">
+<div id="archives">
+  <div id="douban"></div>
+</div>
+<br/><br/>
+</div>
+
+<script>
+var dbapi=new DoubanApi();$(document).ready(function(){dbapi.show()});
+</script>
+
+<div class="separator"></div>
+
+  <div  style="border-bottom: 1px solid #ddd"></div>
+    <footer>
+    <p class="linkings">
+        Utils: <a href="http://docs.opencv.org/doc/tutorials/tutorials.html">opencv</a>&nbsp&nbsp&nbsp&nbsp<a href="http://scikit-learn.org/stable/index.html">scikit-learn</a>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<a href="http://scikit-image.org/">scikit-image</a>
+    </p>
+    <p>
+      &copy; Karen Jiang, Since Sept. 2015.
+      Powered by <a href="http://jekyllrb.com/">Jekyll</a> |
+      Hosted by <a href="https://github.com">Github Pages</a>. 
+    </p>
+    <ul class="links">
+      <li>
+        <a href="https://github.com/yyjiang" title="See my code on GitHub">
+          <i class="icon-github"></i>
+        </a>
+      </li>	  
+      <li>
+        <a href="https://twitter.com/intent/follow?screen_name=yinyan_jiang" title="Follow me on Twitter">
+          <i class="icon-twitter"></i>
+        </a>
+      <li>
+        <a href="/feed.xml" title="Subscribe to my blog with RSS">
+          <i class="icon-feed"></i>
+        </a>
+      </li-->
+    </ul>
+  </footer>

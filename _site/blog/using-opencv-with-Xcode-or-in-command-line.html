@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google-site-verification" content="aexITLS38FdIRzwj25OVWxm87rpa9l-UV0URTyC9cTs" />
+  <title>
+    在Mac上安装并使用opencv2和opencv3
+    
+  </title>
+  <link rel="stylesheet" href="../css/site.css">
+
+  <!-- highlight settings-->
+  <link rel="stylesheet" href="http://yandex.st/highlightjs/7.1/styles/default.min.css">
+<script src="http://yandex.st/highlightjs/7.1/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+  <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+  
+  <link rel="alternate" type="application/atom+xml" title="RSS Feed for Karen's blog" href="/feed.xml" />
+
+  
+
+  
+
+  
+</head>
+<body>
+  <div class="top-bar">
+  </div>
+
+  <div class="header-container">
+    <header class="inner">
+      
+      <nav>
+        <a class="" href="/">About</a>
+        <a class="" href="/project/">Project</a>
+        <!--<a class="" href="/resume/">Resume</a>-->
+        <!--<a href="/resume/">Resume</a>-->
+        <a class="" href="/publication/">Publication</a>
+        <a class="" href="/blog/">Blog</a>
+        <a href="/reading/">Reading</a>
+        <!--<a class=" contact" href="/contact/">Contact</a>-->
+        <a href="https://github.com/yyjiang">Github</a>
+      </nav>
+      
+      
+      <div class="pull-right right logo">
+        <div class="name">
+          <a href="/">Karen</a><br />
+          <small>
+            <em>
+              
+                <a href="/">Keep Going</a>
+              
+            </em>
+          </small>
+        </div>
+        <img class="avatar" src="/images/photo.jpg" alt="My profile picture" />
+      </div>
+      <div class="clear"></div>
+    </header>
+    <div class="clear"></div>
+  </div>
+
+  <!--添加侧边菜单-->
+<!--link rel="stylesheet" href="/css/side-menu.css" />
+ <style>
+        .side-menu {
+            width: 200px;
+            top: 150px;
+            right: 0;
+        }
+ </style>
+<script type="text/javascript" src="/js/jquery.min.js"></script>
+<script type="text/javascript" src="/js/jquery.side.menu.js"></script>
+<script>
+$(function () {
+            $('#main').sideMenu({
+                hs: ['h2']
+            });
+        });
+</script>-->
+
+
+
+<article>
+  <h1 class="inner">
+    在Mac上安装并使用opencv2和opencv3
+  </h1>
+
+  <p class="meta">07 Oct 2015</p>
+
+  
+  
+  <div id="menu"></div>
+  <div id="main" class="span9">
+  <div class="post">
+    <h2 id="opencv2的安装及其python-binding">opencv2的安装及其python binding</h2>
+
+<p>使用homebrew安装将极为简单安全，而使用cmake手动配置复杂很多。假设已有homebew，那么</p>
+
+<ol>
+<li>首先安装opencv2</li>
+</ol>
+<div class="highlight"><pre><code class="language-text" data-lang="text">brew tap homebrew/science
+brew install opencv
+</code></pre></div>
+<p>opencv将被安装于<code>/usr/local/Cellar/opencv/2.4.11_1/</code></p>
+
+<ol>
+<li>进入到Python目录下，比如</li>
+</ol>
+<div class="highlight"><pre><code class="language-text" data-lang="text">cd /Library/Python/2.7/site-packages/
+</code></pre></div>
+<p>创建软链接</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">ln -s /usr/local/Cellar/opencv/2.4.11_1/lib/python2.7/site-packages/cv.py cv.py
+ln -s /usr/local/Cellar/opencv/2.4.11_1/lib/python2.7/site-packages/cv2.so cv2.so
+</code></pre></div>
+<ol>
+<li>测试python的opencv是否安装成功及其版本</li>
+</ol>
+
+<p>只要在python中看是否import成功</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">import cv
+import cv2
+cv2.__version__
+</code></pre></div>
+<p><img src="../images/posts/opencv2_version.png" alt="测试结果"></p>
+
+<h2 id="opencv3的安装及其python-binding">opencv3的安装及其python binding</h2>
+
+<p>由于opencv3比opencv2新添了很多有趣有用的功能，因此可以再安装一个opencv3，并且希望两个版本共存，并且都可以binding到python。为了后续Python调用分得清楚且方便，于是安装<a href="https://www.continuum.io/downloads">anaconda</a>作为新的python入口。</p>
+
+<blockquote>
+<p>Anaconda is a completely free Python distribution (including for commercial use and redistribution). It includes more than 300 of the most popular Python packages for science, math, engineering, and data analysis.</p>
+</blockquote>
+
+<p><img src="../images/posts/anaconda_install.png" alt=""></p>
+
+<ul>
+<li>用brew方法进行安装opencv3
+brew安装opencv3相对要简单很多，一句命令就搞定了。但是好像这么安装后看不到大部分源码。所以想要阅读或使用修改opencv3的某些代码，还是去github上下载一份看，比如opencv3的<a href="https://github.com/Itseez/opencv_contrib">opencv_contrib</a>。</li>
+</ul>
+<div class="highlight"><pre><code class="language-text" data-lang="text">brew install opencv3 —with-contrib
+</code></pre></div>
+<p>—with-contrib表示安装opencv3 contrib repo，contrib里有很多新添加的模块，opencv2里面的SIFT等特征也被挪到了这里面。</p>
+
+<p>安装后opencv3位于目录：
+<code>/usr/local/Cellar/opencv3/3.0.0</code>
+。而之前安装的opencv2.4目录在：
+<code>/usr/local/Cellar/opencv/2.4.11_1</code></p>
+
+<p>上述安装过程最后会给出一些提示信息
+<img src="../images/posts/opencv3_install.png" alt=""></p>
+
+<p>brew为了不混淆opencv2和opencv3，并没把opencv3软链接到/usr/local/。所以，系统默认的路径下，/usr/local/include 以及 /usr/local/lib下的文件其实还是被链接到opencv2的文件下的，因此如果想要用到opencv3这个库，必须明确指定路径:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">/usr/local/opt/opencv3/include
+/usr/local/opt/opencv3/lib
+</code></pre></div>
+<p>其实这两个也是被链接到/usr/local/Cellar/opencv3/3.0.0/include</p>
+
+<p>同时，很多别的包的lib和include也都放置在/usr/local/include下，比如boost。</p>
+
+<ul>
+<li>opencv3的python binding</li>
+</ul>
+
+<p>上述安装过程提示，如果想要把opencv和python绑定，需要执行：</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">echo /usr/local/opt/opencv3/lib/python2.7/site-packages &gt;&gt; /usr/local/lib/python2.7/site-packages/opencv3.pth
+</code></pre></div>
+<p>这句命令意在将opencv3的部分内容重定向到特定路径下的opencv3.pth，相当于指定opencv3所在真实路径。而我想要重定向到anaconda下（知道自己的anaconda路径），于是执行：</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">echo /usr/local/opt/opencv3/lib/python2.7/site-packages &gt;&gt; ~/anaconda/lib/python2.7/site-packages/opencv3.pth
+</code></pre></div>
+<p>其实，感觉这部分操作，类似于opencv2安装过程中的创建软链接，将cv2.so链接到python packages路径下。</p>
+
+<ul>
+<li>测试python的opencv是否安装成功及其版本</li>
+</ul>
+<div class="highlight"><pre><code class="language-text" data-lang="text">import cv
+import cv2
+cv2.__version__
+</code></pre></div>
+<p><img src="../images/posts/opencv3_version.png" alt="测试结果">
+结果显示，cv没安装成功，cv2安装好了，版本为3.0.0。考虑到也没用到过cv，所以暂时不管了。 </p>
+
+<h2 id="xcode中配置opencv3">Xcode中配置opencv3</h2>
+
+<ul>
+<li>创建一个新工程project</li>
+<li>点击build settings -&gt; All
+
+<ul>
+<li>搜索 header search paths，添加<code>/usr/local/opt/opencv3/include</code>以及其他必备include内容（比如系统默认/usr/local/include）</li>
+<li>搜索 library search paths，添加<code>/usr/local/opt/opencv3/lib</code> </li>
+</ul></li>
+<li>右键project名，选择add files to “project_name”，一个新的窗口会弹出，点击<code>/</code>即可跳出路径输入窗口，键入<code>/usr/local/opt/opencv3/lib</code>，选择必要的动态链接库文件，比如<code>
+      libopencv_core.3.0.0.dylib
+      libopencv_highgui.3.0.0.dylib</code></li>
+<li>链接设置：找到linking下地other linker flags，双击并单击+按钮，写入所需要的</li>
+</ul>
+<div class="highlight"><pre><code class="language-text" data-lang="text">    -lopencv_calib3d -lopencv_core -lopencv_features2d -lopencv_flann -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc -lopencv_ml -lopencv_objdetect -lopencv_photo -lopencv_shape -lopencv_stitching -lopencv_superres -lopencv_ts -lopencv_video -lopencv_videoio -lopencv_videostab -lopencv_text
+</code></pre></div>
+<h2 id="命令行使用opencv">命令行使用opencv</h2>
+
+<p>使用命令行运行包含opencv的cpp文件时，需要指定一些参数(include/lib/dylib等)。如果调用的东西不怎么复杂的时候，可以直接全部手动输入哈，比如：</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">g++ -I/usr/local/Cellar/opencv3/3.0.0/include/opencv -I/usr/local/Cellar/opencv3/3.0.0/include -L/usr/local/Cellar/opencv3/3.0.0/lib  -lopencv_face  -lopencv_objdetect  -lopencv_highgui  -lopencv_imgcodecs -lopencv_imgproc -lopencv_core  test.cpp -o test
+</code></pre></div>
+<p>或者使用pkg-config简化操作(安装可以用brew install pkg-config)。pkg-config是一个在源代码编译时查询已安装的库的使用接口的计算机工具软件。首先<code>pkg-config —-cflags —-libs opencv</code>或者<code>pkg-config —-cflags —-libs opencv3</code>可以自动调出opencv中原先配置的链接库、头文件等。可能一些情况下，上述命令会找不到opencv。解决办法就是先找到pkg-config的路径。去<code>
+/usr/local/lib/pkg-config
+</code>
+路径下看看是否有opencv.pc或者opencv3.pc。
+如果用brew安装opencv3，那么opencv3对应的opencv.pc在brew安装路径下的lib下面，可能需要配置一下。配置方法：在~/.bash_profile里面写上两行：
+export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
+export PKG_CONFIG_PATH=/usr/local/opt/opencv3/lib/pkg-config/</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">-I/usr/local/Cellar/opencv3/3.0.0/include/opencv -I/usr/local/Cellar/opencv3/3.0.0/include -L/usr/local/Cellar/opencv3/3.0.0/lib -lopencv_stitching -lopencv_superres -lopencv_videostab -lopencv_adas -lopencv_bgsegm -lopencv_bioinspired -lopencv_ccalib -lopencv_datasets -lopencv_face -lopencv_latentsvm -lopencv_objdetect -lopencv_line_descriptor -lopencv_optflow -lopencv_reg -lopencv_rgbd -lopencv_saliency -lopencv_surface_matching -lopencv_text -lopencv_tracking -lopencv_xfeatures2d -lopencv_calib3d -lopencv_features2d -lopencv_shape -lopencv_video -lopencv_ml -lopencv_flann -lopencv_ximgproc -lopencv_xobjdetect -lopencv_xphoto -lopencv_highgui -lopencv_videoio -lopencv_imgcodecs -lopencv_photo -lopencv_imgproc -lopencv_core -lopencv_hal
+</code></pre></div>
+<p>所以只需要简单一行即可顺利生成可执行文件：</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">g++ `pkg-config --cflags --libs opencv` test.cpp -o test
+</code></pre></div>
+<p>然后运行test可执行文件即可：<code>./test</code>。</p>
+
+<p>比如，test.cpp里面是如下人脸检测代码：</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">#include &quot;opencv2/objdetect/objdetect.hpp&quot;
+#include &quot;opencv2/highgui/highgui.hpp&quot;
+#include &quot;opencv2/imgproc/imgproc.hpp&quot;
+
+#include &lt;iostream&gt;
+#include &lt;stdio.h&gt;
+
+using namespace std;
+using namespace cv;
+
+int main( )
+{
+    Mat image;
+    image = imread(&quot;/Users/jiang/Desktop/test.jpg&quot;);
+    namedWindow( &quot;window&quot;, 1 );
+    imshow( &quot;window&quot;, image );
+    //cvtColor(image, image, COLOR_BGR2GRAY);
+
+    // Load Face cascade (.xml file)
+    CascadeClassifier face_cascade;
+    face_cascade.load( &quot;/Users/jiang/Desktop/haarcascade_frontalface_alt2.xml&quot; );
+
+    // Detect faces
+    std::vector&lt;Rect&gt; faces;
+    face_cascade.detectMultiScale( image, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, Size(30, 30) );
+
+    // Draw circles on the detected faces
+    for( int i = 0; i &lt; faces.size(); i++ )
+    {
+        Point center( faces[i].x + faces[i].width*0.5, faces[i].y + faces[i].height*0.5 );
+        ellipse( image, center, Size( faces[i].width*0.5, faces[i].height*0.5), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
+    }
+
+    imshow( &quot;Detected Face&quot;, image );
+
+    waitKey(0);                   
+    return 0;
+}
+</code></pre></div>
+<p>上述代码，需要从opencv路径那里拷贝<code>haarcascade_frontalface_alt2.xml</code>到当前路径下，检测结果如图。哈哈拿靖王殿下试试手吧。
+<img src="../images/posts/face_detection.png" alt=""></p>
+
+  </div>
+  </div>
+</article>
+
+<section class="comments inner">
+<!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_renren"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+</section>
+
+<section class="post-footer-self-promotion inner">
+  <h3>最近文章</h3>
+  <ul class="posts">
+    
+    <li>
+      <span>07 Oct 2015 &raquo;</span> <a href="/blog/some-tips-with-Xcode.html">Xcode的一些小使用记录</a>
+    </li>
+    
+    <li>
+      <span>30 Sep 2015 &raquo;</span> <a href="/blog/writing-chinese-onto-images-using-putText-and-freetype.html">在图像上写入中英文字符串的几个方法</a>
+    </li>
+    
+    <li>
+      <span>22 Sep 2015 &raquo;</span> <a href="/blog/scene-text-baidu-ocr-api.html">百度OCR企业版API的python调用小代码</a>
+    </li>
+    
+  </ul>
+</section>
+
+<!-- mathjax -->
+<script src="/public/js/bootstrap.min.js"></script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/javascript">
+  $(function(){
+    $("p:has(img), p:has(embed)").css('text-align', 'center');
+    $(".post-wrapper .entry a, .post-content a").not(".more-link.btn").attr('target', '_blank');
+  });
+</script>
+
+<div class="separator"></div>
+<section class="comments inner">
+<!-- Duoshuo Comment BEGIN -->
+	<div class="ds-thread"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"yyjiang"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = 'http://static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		|| document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- Duoshuo Comment END -->
+
+<!-- Disqus Comment BEGIN -->
+  <!--<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'yongyuan'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>-->
+<!-- Disqus Comment END -->
+
+</section>
+
+  <div class="separator"></div>
+
+  <div  style="border-bottom: 1px solid #ddd"></div>
+    <footer>
+    <p class="linkings">
+        Utils: <a href="http://docs.opencv.org/doc/tutorials/tutorials.html">opencv</a>&nbsp&nbsp&nbsp&nbsp<a href="http://scikit-learn.org/stable/index.html">scikit-learn</a>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<a href="http://scikit-image.org/">scikit-image</a>
+    </p>
+    <p>
+      &copy; Karen Jiang, Since Sept. 2015.
+      Powered by <a href="http://jekyllrb.com/">Jekyll</a> |
+      Hosted by <a href="https://github.com">Github Pages</a>. 
+    </p>
+    <ul class="links">
+      <li>
+        <a href="https://github.com/yyjiang" title="See my code on GitHub">
+          <i class="icon-github"></i>
+        </a>
+      </li>	  
+      <li>
+        <a href="https://twitter.com/intent/follow?screen_name=yinyan_jiang" title="Follow me on Twitter">
+          <i class="icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a href="/feed.xml" title="Subscribe to my blog with RSS">
+          <i class="icon-feed"></i>
+        </a>
+      </li>
+    </ul>
+  </footer>
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-67985565-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+    /*!
+     * http://github.com/ssaunier/track-outbound-links
+     * Copyright 2013 Sébastien Saunier
+     * @license MIT
+     */
+    !function(e,t){function n(){for(var n=t.getElementsByTagName("a"),a=[],r=0;r<n.length;++r){var o=n[r];o.host!=e.location.host&&a.push(o)}return a}function a(n){for(var a=n.srcElement||n.target;a&&("undefined"==typeof a.tagName||"a"!=a.tagName.toLowerCase()||!a.href);)a=a.parentNode;a&&a.href&&(e._gaq&&_gaq.push(["_trackEvent","Outbound link","Click",a.href]),(!a.target||a.target.match(/^_(self|parent|top)$/i))&&(setTimeout(function(){t.location.href=a.href},150),n.preventDefault?n.preventDefault():n.returnValue=!1))}e.addEventListener("load",function(){var e=n();for(var t in e)e[t].addEventListener("click",a)})}(window,document);
+    var links = document.links;
+    for (var i = 0, linksLength = links.length; i < linksLength; i++) {
+       if (links[i].hostname != window.location.hostname) { links[i].target = '_blank'; }
+    }
+
+    /*
+     * Detect if we are included in an iframe => move.
+     */
+    if (window.top !== window.self
+        && !window.self.location.href.match(/headsha\.re/))
+    {
+      window.top.location.replace(window.self.location.href);
+    }
+  </script>
+
+
+</body>
+</html>

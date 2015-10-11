@@ -1,0 +1,966 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Karen - Blog</title>
+    <description>On Software Engineering, Lean Startup, Agile and Productivity</description>
+    <link>http://yyjiang.github.io</link>
+    <atom:link href="/feed.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>在Mac上安装并使用opencv2和opencv3</title>
+      <description>&lt;h2 id=&quot;opencv2的安装及其python-binding&quot;&gt;opencv2的安装及其python binding&lt;/h2&gt;
+
+&lt;p&gt;使用homebrew安装将极为简单安全，而使用cmake手动配置复杂很多。假设已有homebew，那么&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;首先安装opencv2&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;brew tap homebrew/science
+brew install opencv
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;opencv将被安装于&lt;code&gt;/usr/local/Cellar/opencv/2.4.11_1/&lt;/code&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;进入到Python目录下，比如&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;cd /Library/Python/2.7/site-packages/
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;创建软链接&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;ln -s /usr/local/Cellar/opencv/2.4.11_1/lib/python2.7/site-packages/cv.py cv.py
+ln -s /usr/local/Cellar/opencv/2.4.11_1/lib/python2.7/site-packages/cv2.so cv2.so
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ol&gt;
+&lt;li&gt;测试python的opencv是否安装成功及其版本&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;只要在python中看是否import成功&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;import cv
+import cv2
+cv2.__version__
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;img src=&quot;../images/posts/opencv2_version.png&quot; alt=&quot;测试结果&quot;&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;opencv3的安装及其python-binding&quot;&gt;opencv3的安装及其python binding&lt;/h2&gt;
+
+&lt;p&gt;由于opencv3比opencv2新添了很多有趣有用的功能，因此可以再安装一个opencv3，并且希望两个版本共存，并且都可以binding到python。为了后续Python调用分得清楚且方便，于是安装&lt;a href=&quot;https://www.continuum.io/downloads&quot;&gt;anaconda&lt;/a&gt;作为新的python入口。&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Anaconda is a completely free Python distribution (including for commercial use and redistribution). It includes more than 300 of the most popular Python packages for science, math, engineering, and data analysis.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;img src=&quot;../images/posts/anaconda_install.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;用brew方法进行安装opencv3
+brew安装opencv3相对要简单很多，一句命令就搞定了。但是好像这么安装后看不到大部分源码。所以想要阅读或使用修改opencv3的某些代码，还是去github上下载一份看，比如opencv3的&lt;a href=&quot;https://github.com/Itseez/opencv_contrib&quot;&gt;opencv_contrib&lt;/a&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;brew install opencv3 —with-contrib
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;—with-contrib表示安装opencv3 contrib repo，contrib里有很多新添加的模块，opencv2里面的SIFT等特征也被挪到了这里面。&lt;/p&gt;
+
+&lt;p&gt;安装后opencv3位于目录：
+&lt;code&gt;/usr/local/Cellar/opencv3/3.0.0&lt;/code&gt;
+。而之前安装的opencv2.4目录在：
+&lt;code&gt;/usr/local/Cellar/opencv/2.4.11_1&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;上述安装过程最后会给出一些提示信息
+&lt;img src=&quot;../images/posts/opencv3_install.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;brew为了不混淆opencv2和opencv3，并没把opencv3软链接到/usr/local/。所以，系统默认的路径下，/usr/local/include 以及 /usr/local/lib下的文件其实还是被链接到opencv2的文件下的，因此如果想要用到opencv3这个库，必须明确指定路径:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;/usr/local/opt/opencv3/include
+/usr/local/opt/opencv3/lib
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其实这两个也是被链接到/usr/local/Cellar/opencv3/3.0.0/include&lt;/p&gt;
+
+&lt;p&gt;同时，很多别的包的lib和include也都放置在/usr/local/include下，比如boost。&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;opencv3的python binding&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;上述安装过程提示，如果想要把opencv和python绑定，需要执行：&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;echo /usr/local/opt/opencv3/lib/python2.7/site-packages &amp;gt;&amp;gt; /usr/local/lib/python2.7/site-packages/opencv3.pth
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这句命令意在将opencv3的部分内容重定向到特定路径下的opencv3.pth，相当于指定opencv3所在真实路径。而我想要重定向到anaconda下（知道自己的anaconda路径），于是执行：&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;echo /usr/local/opt/opencv3/lib/python2.7/site-packages &amp;gt;&amp;gt; ~/anaconda/lib/python2.7/site-packages/opencv3.pth
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其实，感觉这部分操作，类似于opencv2安装过程中的创建软链接，将cv2.so链接到python packages路径下。&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;测试python的opencv是否安装成功及其版本&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;import cv
+import cv2
+cv2.__version__
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;img src=&quot;../images/posts/opencv3_version.png&quot; alt=&quot;测试结果&quot;&gt;
+结果显示，cv没安装成功，cv2安装好了，版本为3.0.0。考虑到也没用到过cv，所以暂时不管了。 &lt;/p&gt;
+
+&lt;h2 id=&quot;xcode中配置opencv3&quot;&gt;Xcode中配置opencv3&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;创建一个新工程project&lt;/li&gt;
+&lt;li&gt;点击build settings -&amp;gt; All
+
+&lt;ul&gt;
+&lt;li&gt;搜索 header search paths，添加&lt;code&gt;/usr/local/opt/opencv3/include&lt;/code&gt;以及其他必备include内容（比如系统默认/usr/local/include）&lt;/li&gt;
+&lt;li&gt;搜索 library search paths，添加&lt;code&gt;/usr/local/opt/opencv3/lib&lt;/code&gt; &lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;右键project名，选择add files to “project_name”，一个新的窗口会弹出，点击&lt;code&gt;/&lt;/code&gt;即可跳出路径输入窗口，键入&lt;code&gt;/usr/local/opt/opencv3/lib&lt;/code&gt;，选择必要的动态链接库文件，比如&lt;code&gt;
+      libopencv_core.3.0.0.dylib
+      libopencv_highgui.3.0.0.dylib&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;链接设置：找到linking下地other linker flags，双击并单击+按钮，写入所需要的&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;    -lopencv_calib3d -lopencv_core -lopencv_features2d -lopencv_flann -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc -lopencv_ml -lopencv_objdetect -lopencv_photo -lopencv_shape -lopencv_stitching -lopencv_superres -lopencv_ts -lopencv_video -lopencv_videoio -lopencv_videostab -lopencv_text
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&quot;命令行使用opencv&quot;&gt;命令行使用opencv&lt;/h2&gt;
+
+&lt;p&gt;使用命令行运行包含opencv的cpp文件时，需要指定一些参数(include/lib/dylib等)。如果调用的东西不怎么复杂的时候，可以直接全部手动输入哈，比如：&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;g++ -I/usr/local/Cellar/opencv3/3.0.0/include/opencv -I/usr/local/Cellar/opencv3/3.0.0/include -L/usr/local/Cellar/opencv3/3.0.0/lib  -lopencv_face  -lopencv_objdetect  -lopencv_highgui  -lopencv_imgcodecs -lopencv_imgproc -lopencv_core  test.cpp -o test
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;或者使用pkg-config简化操作(安装可以用brew install pkg-config)。pkg-config是一个在源代码编译时查询已安装的库的使用接口的计算机工具软件。首先&lt;code&gt;pkg-config —-cflags —-libs opencv&lt;/code&gt;或者&lt;code&gt;pkg-config —-cflags —-libs opencv3&lt;/code&gt;可以自动调出opencv中原先配置的链接库、头文件等。可能一些情况下，上述命令会找不到opencv。解决办法就是先找到pkg-config的路径。去&lt;code&gt;
+/usr/local/lib/pkg-config
+&lt;/code&gt;
+路径下看看是否有opencv.pc或者opencv3.pc。
+如果用brew安装opencv3，那么opencv3对应的opencv.pc在brew安装路径下的lib下面，可能需要配置一下。配置方法：在~/.bash_profile里面写上两行：
+export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
+export PKG_CONFIG_PATH=/usr/local/opt/opencv3/lib/pkg-config/&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;-I/usr/local/Cellar/opencv3/3.0.0/include/opencv -I/usr/local/Cellar/opencv3/3.0.0/include -L/usr/local/Cellar/opencv3/3.0.0/lib -lopencv_stitching -lopencv_superres -lopencv_videostab -lopencv_adas -lopencv_bgsegm -lopencv_bioinspired -lopencv_ccalib -lopencv_datasets -lopencv_face -lopencv_latentsvm -lopencv_objdetect -lopencv_line_descriptor -lopencv_optflow -lopencv_reg -lopencv_rgbd -lopencv_saliency -lopencv_surface_matching -lopencv_text -lopencv_tracking -lopencv_xfeatures2d -lopencv_calib3d -lopencv_features2d -lopencv_shape -lopencv_video -lopencv_ml -lopencv_flann -lopencv_ximgproc -lopencv_xobjdetect -lopencv_xphoto -lopencv_highgui -lopencv_videoio -lopencv_imgcodecs -lopencv_photo -lopencv_imgproc -lopencv_core -lopencv_hal
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;所以只需要简单一行即可顺利生成可执行文件：&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;g++ `pkg-config --cflags --libs opencv` test.cpp -o test
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后运行test可执行文件即可：&lt;code&gt;./test&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;比如，test.cpp里面是如下人脸检测代码：&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;#include &amp;quot;opencv2/objdetect/objdetect.hpp&amp;quot;
+#include &amp;quot;opencv2/highgui/highgui.hpp&amp;quot;
+#include &amp;quot;opencv2/imgproc/imgproc.hpp&amp;quot;
+
+#include &amp;lt;iostream&amp;gt;
+#include &amp;lt;stdio.h&amp;gt;
+
+using namespace std;
+using namespace cv;
+
+int main( )
+{
+    Mat image;
+    image = imread(&amp;quot;/Users/jiang/Desktop/test.jpg&amp;quot;);
+    namedWindow( &amp;quot;window&amp;quot;, 1 );
+    imshow( &amp;quot;window&amp;quot;, image );
+    //cvtColor(image, image, COLOR_BGR2GRAY);
+
+    // Load Face cascade (.xml file)
+    CascadeClassifier face_cascade;
+    face_cascade.load( &amp;quot;/Users/jiang/Desktop/haarcascade_frontalface_alt2.xml&amp;quot; );
+
+    // Detect faces
+    std::vector&amp;lt;Rect&amp;gt; faces;
+    face_cascade.detectMultiScale( image, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, Size(30, 30) );
+
+    // Draw circles on the detected faces
+    for( int i = 0; i &amp;lt; faces.size(); i++ )
+    {
+        Point center( faces[i].x + faces[i].width*0.5, faces[i].y + faces[i].height*0.5 );
+        ellipse( image, center, Size( faces[i].width*0.5, faces[i].height*0.5), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
+    }
+
+    imshow( &amp;quot;Detected Face&amp;quot;, image );
+
+    waitKey(0);                   
+    return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;上述代码，需要从opencv路径那里拷贝&lt;code&gt;haarcascade_frontalface_alt2.xml&lt;/code&gt;到当前路径下，检测结果如图。哈哈拿靖王殿下试试手吧。
+&lt;img src=&quot;../images/posts/face_detection.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+</description>
+      <pubDate>Wed, 07 Oct 2015 00:00:00 +0000</pubDate>
+      <link>/blog/using-opencv-with-Xcode-or-in-command-line.html</link>
+      <guid isPermaLink="true">/blog/using-opencv-with-Xcode-or-in-command-line.html</guid>
+    </item>
+    
+    <item>
+      <title>Xcode的一些小使用记录</title>
+      <description>&lt;h2 id=&quot;xcode添加参数&quot;&gt;Xcode添加参数&lt;/h2&gt;
+
+&lt;p&gt;c/c++里面
+int main(int argc, char * argv[])
+argc参数数目，argv[0]是文件名，argv[1]-&amp;gt;argv[argc-1]是真正的参数&lt;/p&gt;
+
+&lt;p&gt;在Xcode里添加参数选项，只需要在菜单栏 product -&amp;gt; scheme -&amp;gt; edit scheme -&amp;gt; Run -&amp;gt; 填入参数&lt;/p&gt;
+
+&lt;h2 id=&quot;xcode-working-directory-settings&quot;&gt;Xcode working directory settings:&lt;/h2&gt;
+
+&lt;p&gt;In Xcode go to Product &amp;gt; Scheme &amp;gt; Edit Scheme &amp;gt; Run test (on the right) &amp;gt; Options (middle top)&lt;/p&gt;
+
+&lt;p&gt;Down under Options check “Use custom working directory” and set it to the directory where your files are located.&lt;/p&gt;
+</description>
+      <pubDate>Wed, 07 Oct 2015 00:00:00 +0000</pubDate>
+      <link>/blog/some-tips-with-Xcode.html</link>
+      <guid isPermaLink="true">/blog/some-tips-with-Xcode.html</guid>
+    </item>
+    
+    <item>
+      <title>在图像上写入中英文字符串的几个方法</title>
+      <description>&lt;p&gt;图像处理过程中为了显示结果，可能需要在图像上显示文字。
+基于C/C++语言的可以使用opencv的&lt;code&gt;putText&lt;/code&gt;函数完成这一功能。opencv自带函数 &lt;code&gt;putText&lt;/code&gt; 可以实现往图像上写入文本字符串这一功能。这可以将检测或者识别结果方便地在图像或者视频上标出来。
+基于python语言的可以使用opencv的Python &lt;code&gt;cv2.putText&lt;/code&gt;函数以及PIL package中的&lt;code&gt;imageDraw&lt;/code&gt;模块。&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;C++中opencv包渲染文字的函数说明：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;C++: void putText(Mat&amp;amp; img, const string&amp;amp; text, Point org, int fontFace, double fontScale, Scalar color, int thickness=1, int lineType=8, bool bottomLeftOrigin=false )
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;python中opencv包渲染文字的函数说明：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;Python: cv2.putText(img, text, org, fontFace, fontScale, color[, thickness[, lineType[, bottomLeftOrigin]]]) → None
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;putText&lt;/code&gt; 将以位置&lt;code&gt;org&lt;/code&gt;为左下角，在图像&lt;code&gt;img&lt;/code&gt;上渲染字符串&lt;code&gt;text&lt;/code&gt;。函数可以指定字体类型、字体大小，字体颜色，粗细，线条类型等参数。&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;python中PIL包渲染文字的函数说明：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;PIL.ImageDraw.Draw.text(xy, text, fill=None, font=None, anchor=None)
+PIL.ImageDraw.Draw.multiline_text(xy, text, fill=None, font=None, anchor=None, spacing=0, align=&amp;quot;left&amp;quot;)
+PIL.ImageDraw.Draw.textsize(text, font=None)
+PIL.ImageDraw.Draw.multiline_textsize(text, font=None, spacing=0)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;PIL.ImageDraw.Draw.text()&lt;/code&gt;中的参数&lt;code&gt;xy&lt;/code&gt;即类似于&lt;code&gt;putText&lt;/code&gt;中的&lt;code&gt;org&lt;/code&gt;，用于指定文字位置。不过需要注意的是，&lt;code&gt;xy&lt;/code&gt;指定的是左上角坐标，而 &lt;code&gt;org&lt;/code&gt;指定的是左下角坐标。&lt;/p&gt;
+
+&lt;p&gt;opencv的&lt;code&gt;putText&lt;/code&gt;目前支持的字体能够表示英文字母和数字，并不能够表示中文，中文字符串会变成一串问号。PIL可以直接指定字体类型显示中文。&lt;/p&gt;
+
+&lt;h1 id=&quot;1-opencv与c-环境下方法&quot;&gt;1. opencv与C++环境下方法&lt;/h1&gt;
+
+&lt;p&gt;网上有人已经基于freetype写了一个支持中文的putText，特此记录一下使用方法。&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;首先，需要安装&lt;a href=&quot;http://www.freetype.org/index.html&quot;&gt;freetype&lt;/a&gt;。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;FreeType is a freely available software library to render fonts.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;我下载的是Freetype 2.6。然后将压缩包置于某一路径（比如~/src）下，解压缩，命令行进入到该解压缩后的文件路径下。&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;cd ~/src/freetype-2.6
+./configure
+make
+make install
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这就安装好了，freetype的include和lib文件夹分别位于&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;/usr/local/include/freetype2
+/usr/local/lib
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在使用freetype的时候，需要添加这两个路径添加。&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;然后，下载代码&lt;a href=&quot;https://github.com/zhh-cui/i18nText&quot;&gt;i18nText&lt;/a&gt;。该代码主要内容包含一个&lt;code&gt;i18nText.h&lt;/code&gt;头文件和&lt;code&gt;i18nText.cpp&lt;/code&gt;，这两个文件实现了一个新的往图像上渲染文字函数&lt;code&gt;i18nText.putText()&lt;/code&gt;。&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;最后，开始基于以上基础在Xcode project中往图像上渲染文字。
+project的 Build Settings添加以下：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;header search path : /usr/local/include/freetype2&lt;/li&gt;
+&lt;li&gt;lib search path : /usr/local/lib&lt;/li&gt;
+&lt;li&gt;project名字上右键选择add files to &amp;#39;xxx&amp;#39;，添加/usr/local/lib/libfreetype.6.dylib&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;然后，测试样例如下：&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;    cv::Mat test(200, 400, CV_8UC3, CV_RGB(255, 255, 255));
+    cv::namedWindow(&amp;quot;test&amp;quot;, CV_WINDOW_NORMAL);
+    i18nText i18n;
+    FT_Error success = i18n.setFont(&amp;quot;/System/Library/Fonts/STHeiti Light.ttc&amp;quot;);
+
+    if (success) {
+        std::cout &amp;lt;&amp;lt; &amp;quot;Load fonts successfully.&amp;quot; &amp;lt;&amp;lt; std::endl;
+
+        const wchar_t *msg1 = L&amp;quot;此情可待成追忆&amp;quot;;
+        int num = i18n.putText(test, msg1, cv::Point(100, 80), CV_RGB(0, 0, 255));
+
+
+        const wchar_t *msg2 = L&amp;quot;只是当时已惘然&amp;quot;;
+        num = i18n.putText(test, msg2, cv::Point(100, 150), CV_RGB(255, 0, 0));
+
+    }
+
+    cv::imshow(&amp;quot;test&amp;quot;, test);
+    cv::waitKey(0);
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中，首先需要创建一个实例&lt;code&gt;i18nText&lt;/code&gt;，然后调用&lt;code&gt;i18nText.setFont()&lt;/code&gt;设置字体，接着就可以类似于opencv那样调用&lt;code&gt;i18nText.putText()&lt;/code&gt;对图像进行文字渲染了。运行后显示（截图并下采样了的，显示得有点模糊诶）：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../images/posts/chn_text_c.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;2-python中pil方法&quot;&gt;2. python中PIL方法&lt;/h1&gt;
+
+&lt;p&gt;首先得需要安装PIL package。通过pip可以轻松搞定，不过名字并不叫PIL，而是pillow&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;sudo pip install pillow
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;最后，通过指定字体类型，位置等参数就可以完成文字渲染。下面是具体的测试代码&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;# -*- coding: utf-8 -*-
+from PIL import Image,ImageDraw,ImageFont
+import sys
+
+img = Image.new(&amp;#39;RGB&amp;#39;, (400, 200), (255, 255, 255))
+
+font = ImageFont.truetype(&amp;#39;/System/Library/Fonts/STHeiti Light.ttc&amp;#39;, 24)
+
+draw = ImageDraw.Draw(img)
+
+words_1 = u&amp;#39;此情可待成追忆&amp;#39;
+draw.text((100, 80), words_1, (0, 0, 255), font=font)
+
+words_2 = unicode(&amp;#39;只是当时已惘然&amp;#39;, &amp;#39;utf-8&amp;#39;)
+draw.text((100, 150), words_2, (255, 0, 0), font=font) 
+
+#img.show()
+img.save(&amp;#39;chn_text_python.png&amp;#39;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;运行显示结果（没有边框的样子好怪。。。）:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../images/posts/chn_text_python.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;对比一下两张显示结果，同样的参数，PIL中的要靠上一点，这也就是坐标位置指定的是左上角而非左下角的缘故。&lt;/p&gt;
+
+&lt;p&gt;需要注意的是，新建一张特定大小的纯白图像，在opencv和PIL中指定参数时候顺序并不一样。一张高200像素，宽400像素的图像，在opencv中是(200, 400)，对应于PIL中的(400, 200)。不过在putText和text方法里倒是坐标一致了，都是(横向距离，竖向距离)，即与PIL中相一致。&lt;/p&gt;
+
+&lt;h1 id=&quot;3-总结&quot;&gt;3. 总结&lt;/h1&gt;
+
+&lt;ul&gt;
+&lt;li&gt;在python中，只要安装调用PIL的ImageDraw模块即可，简单易操作。不过估计也是要依赖于freetype，这个暂时不太清楚。&lt;/li&gt;
+&lt;li&gt;在C++中，需要首先安装freetype，并进行相应设置（include，lib/dylib）。最后在你的工程里包含进i18nText的两个简单文件就可以通过&lt;code&gt;i18nText.putText()&lt;/code&gt;来进行中文渲染了。好像是略复杂，没办法啦。&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+      <pubDate>Wed, 30 Sep 2015 00:00:00 +0000</pubDate>
+      <link>/blog/writing-chinese-onto-images-using-putText-and-freetype.html</link>
+      <guid isPermaLink="true">/blog/writing-chinese-onto-images-using-putText-and-freetype.html</guid>
+    </item>
+    
+    <item>
+      <title>百度OCR企业版API的python调用小代码</title>
+      <description>&lt;p&gt;上周使用&lt;a href=&quot;http://apistore.baidu.com/apiworks/servicedetail/969.html&quot;&gt;百度自然场景OCR服务&lt;/a&gt;进行了一些图片的测试，记录一下。要使用该API，需要先注册一个百度账号，用相应API key申请应用。&lt;/p&gt;
+
+&lt;p&gt;首先import会用到的packages。base64用于图像编解码，cv2是opencv包，用于显示图像。&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;# -*- coding: utf-8 -*-
+import urllib, urllib2, json
+import base64
+import cv2
+import numpy as np
+
+#set encoding
+import sys, os
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;由于百度OCR API只能处理jpg文件，于是定义一个从某路径下读取所有jpg文件的函数：&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;def my_listdir(directory):
+    &amp;quot;&amp;quot;&amp;quot;A specialized version of os.listdir() that ignores non-jpg files. &amp;quot;&amp;quot;&amp;quot;
+    file_list = os.listdir(directory)
+    #print file_list
+    return [x for x in file_list
+            if (x.endswith(&amp;#39;.jpg&amp;#39;) or x.endswith(&amp;#39;.JPG&amp;#39;) or x.endswith(&amp;#39;.jpeg&amp;#39;)]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后定义一个baidu_ocr函数调用百度OCR API服务，输入为filename，即文件名，返回一个json string。  API可以指定的参数封装在data字典中，有&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;fromdevice: iphone, android, pc&lt;/li&gt;
+&lt;li&gt;clientip&lt;/li&gt;
+&lt;li&gt;detecttype: Locate, LocateRecognition&lt;/li&gt;
+&lt;li&gt;languagetype: CHN_ENG, ENG&lt;/li&gt;
+&lt;li&gt;imagetype: 1, 经过base64编码的图像；2, 图像原文件&lt;/li&gt;
+&lt;li&gt;image: 图片，小于300K的jpg文件&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;当imagetype=1时，读取文件后，使用base64.b64encode进行编码，再使用urlencode编码。在下面的代码中，将your api-key替换为自己的api-key，最终返回的content是一个json string。&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;def baidu_ocr(filename):
+    #print sys.getdefaultencoding() 
+    reload(sys) 
+    sys.setdefaultencoding(&amp;#39;utf8&amp;#39;)
+
+    url = &amp;#39;http://apis.baidu.com/idl_baidu/baiduocrpay/idlocrpaid&amp;#39;
+
+    data = {}
+    data[&amp;#39;fromdevice&amp;#39;] = &amp;quot;iphone&amp;quot;
+    data[&amp;#39;clientip&amp;#39;] = &amp;quot;10.10.10.0&amp;quot;
+    data[&amp;#39;detecttype&amp;#39;] = &amp;quot;LocateRecognize&amp;quot;
+    data[&amp;#39;languagetype&amp;#39;] = &amp;quot;CHN_ENG&amp;quot;
+    data[&amp;#39;imagetype&amp;#39;] = &amp;quot;1&amp;quot;
+
+    # read image
+    file = open(filename, &amp;#39;rb&amp;#39;)
+    image =  file.read()
+    file.close()
+
+    data[&amp;#39;image&amp;#39;] = base64.b64encode(image)
+
+    decoded_data = urllib.urlencode(data)
+    req = urllib2.Request(url, data = decoded_data)
+
+    req.add_header(&amp;quot;Content-Type&amp;quot;, &amp;quot;application/x-www-form-urlencoded&amp;quot;)
+    req.add_header(&amp;quot;apikey&amp;quot;, &amp;quot;your api-kay&amp;quot;)
+
+    resp = urllib2.urlopen(req)
+    content = resp.read()
+
+    return content
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后定义了一个text_reader的函数，根据API返回的json string在图像画出检测框，并打印出所有输出结果。我尝试想用opencvde cv2.putText() 在检测框边上标出识别结果，但是opencv的putText好像不支持中文，输出会是一串问号。。。暂时没找到解决方法。所以只是标出检测框及其编号。&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;def text_reader(print_type=True):
+    img_path = &amp;#39;web&amp;#39;
+    file_list = my_listdir(img_path)
+    img_len = len(file_list)
+    #print file_list
+    for i in xrange(img_len):
+        img_name = file_list[i]
+
+        image = cv2.imread(os.path.join(img_path, file_list[i]))
+        cv2.imwrite(os.path.join(img_path, &amp;quot;tmp_&amp;quot;+img_name), image)
+
+        content = baidu_ocr(os.path.join(img_path, &amp;quot;tmp_&amp;quot;+img_name))
+
+        # print result
+        if(content and print_type):
+            dic = json.loads(content)
+            out_uni = json.dumps(dic, indent=2, ensure_ascii=False)
+            print out_uni
+
+        # imshow result
+        if(content):
+            dic = json.loads(content)
+            results = dic[&amp;#39;retData&amp;#39;]
+            box_num = 0
+            for result in results:
+                word = result[&amp;#39;word&amp;#39;]
+
+                width, top, height, left = result[&amp;#39;rect&amp;#39;].values()
+                width, top, height, left = int(width), int(top), int(height), int(left)
+                #print type(width)
+                cv2.rectangle(image, (left, top), (left+width, top+height), (0, 255, 0), 2)
+                cv2.putText(image, unicode(box_num), (left, top+height), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+                box_num += 1
+            cv2.imshow(&amp;quot;image&amp;quot;, image)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+
+
+if __name__ == &amp;#39;__main__&amp;#39;:
+    text_reader()
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;总结一下这其中遇到的编码问题。&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;在python内查看与修改当前编码方式：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;    import sys
+    sys.getdefaultencoding()  # 默认编码方式，mac下默认为ascii
+    reload(sys)
+    sys.setdefaultencoding(‘utf-8’) # 设置编码方式为utf-8
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;判断是否是字符串(basestring, include str and unicode)，判断是否是str或unicode方法&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;    isinstance(a, str)
+    isinstance(a, unicode)
+    isinstance(a, basestring)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;json loads() 与 dumps()&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;json.dumps() 将python数据结构（比如dict）转化为string（默认情况）或unicode。&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;    json.dumps(obj, ensure_ascii, encoding…)
+    - obj python数据结构：dic, list ...
+    - ensure_ascii = True(default)
+        dumps return str
+    -ensure_ascii = False
+        dumps return unicode
+    -encoding
+        在obj进行转化之前，所有obj中的str都会先转化为unicode，即str.decode(encoding)
+    -默认情况：
+        str -&amp;gt; unicode -&amp;gt; json(unicode) -&amp;gt; str
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;所以如果想要得到汉字的完整输出，可以设置ensure_ascii=False，得到unicode形式的输出，而不是转义后的str。&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;    output_unicode = json.dumps(dic, indent=2, ensure_ascii=False)
+    print output_unicode
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;对于过程 str -&amp;gt; unicode -&amp;gt; json(unicode) -&amp;gt; str，第一过程str -&amp;gt; unicode的decode在encoding参数下控制，json(unicode) -&amp;gt; str 这里的encoding是默认控制的。
+这个默认控制不是encode，而是直接把unicode转义为ascii编码，这个ascii编码的内容是unicode。&lt;/p&gt;
+</description>
+      <pubDate>Tue, 22 Sep 2015 00:00:00 +0000</pubDate>
+      <link>/blog/scene-text-baidu-ocr-api.html</link>
+      <guid isPermaLink="true">/blog/scene-text-baidu-ocr-api.html</guid>
+    </item>
+    
+    <item>
+      <title>Mac上python读写csv的分隔符问题</title>
+      <description>&lt;p&gt;在mac上用python将数据写入csv文件，用excel打开总是全部写在同一列上。后来在stackoverflow上找到一个回复：&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;On Mac OS X, this setting seems to be deduced from the decimal separator setting (in the language pane of system preferences). If the decimal separator is a point then the default CSV separator will be a comma, but if the decimal separator is a comma, then the default CSV separator will be a semicolon.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;也就是说这是因为系统偏好设置里的decimal separator导致的问题。如果偏好设置里分隔符是句号，那么csv分隔符默认是逗号；如果偏好设置里分隔符是逗号，那么csv分隔符默认是分号。&lt;/p&gt;
+
+&lt;p&gt;csv文件一般都是以逗号作为分隔符，所以要不然修改偏好设置的分隔符为句号，要不然python读写csv的时候分隔符设置为分号。&lt;/p&gt;
+</description>
+      <pubDate>Tue, 28 Jul 2015 00:00:00 +0000</pubDate>
+      <link>/blog/some-tips-when-writing-csv-using-python.html</link>
+      <guid isPermaLink="true">/blog/some-tips-when-writing-csv-using-python.html</guid>
+    </item>
+    
+    <item>
+      <title>简单分类器的python代码实现</title>
+      <description>&lt;p&gt;本文是stanford大学课程：&lt;a href=&quot;http://vision.stanford.edu/teaching/cs231n/&quot;&gt;Convolutional Neural Networks for Visual Recognition&lt;/a&gt; 的一些笔记与第一次作业。主要内容为简单（多类）分类器的实现：KNN, SVM, softmax。&lt;/p&gt;
+
+&lt;p&gt;softmax与SVM的一点区别，其中一张PPT说明：
+&lt;img src=&quot;../images/posts/softmax.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;分类器实现的训练步骤三步走：&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;计算 score matrix&lt;/li&gt;
+&lt;li&gt;基于 score matrix 与真实标签计算代价函数cost function/ loss function&lt;/li&gt;
+&lt;li&gt;由cost function对分类器参数求导，计算最优参数 （KNN不需要）&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;knn-分类器&quot;&gt;KNN 分类器&lt;/h2&gt;
+
+&lt;p&gt;KNN分类器封装为一个类，包括常规的函数&lt;code&gt;__init__&lt;/code&gt;, &lt;code&gt;train&lt;/code&gt;, &lt;code&gt;predict&lt;/code&gt;以及一些别的重要函数。KNN不需要训练，因此&lt;code&gt;train&lt;/code&gt;只是存下gallery数据和标签：&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;def train(self, X, y):
+    &amp;quot;&amp;quot;&amp;quot;
+    Train the classifier. For k-nearest neighbors this is just 
+    memorizing the training data.
+
+    Input:
+    X - A num_train x dimension array where each row is a training point.
+    y - A vector of length num_train, where y[i] is the label for X[i, :]
+    &amp;quot;&amp;quot;&amp;quot;
+    self.X_train = X
+    self.y_train = y
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;对于KNN来说，预测分类，最主要的就是距离的定义与计算，得到一个距离矩阵或者称为得分矩阵score。然后根据score排序得到最相似的K个样本，采取某种策略由该K个样本的类别决定测试样本的标签。&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;def predict(self, X, k=1, num_loops=0):
+    &amp;quot;&amp;quot;&amp;quot;
+    Predict labels for test data using this classifier.
+
+    Input:
+    X - A num_test x dimension array where each row is a test point.
+    k - The number of nearest neighbors that vote for predicted label
+    num_loops - Determines which method to use to compute distances
+                between training points and test points.
+
+    Output:
+    y - A vector of length num_test, where y[i] is the predicted label for the
+        test point X[i, :].
+    &amp;quot;&amp;quot;&amp;quot;
+    if num_loops == 0:
+      dists = self.compute_distances_no_loops(X)
+    elif num_loops == 1:
+      dists = self.compute_distances_one_loop(X)
+    elif num_loops == 2:
+      dists = self.compute_distances_two_loops(X)
+    else:
+      raise ValueError(&amp;#39;Invalid value %d for num_loops&amp;#39; % num_loops)
+
+    return self.predict_labels(dists, k=k)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;其中&lt;code&gt;predict_labels&lt;/code&gt;函数是由距离dists和k个近邻得到预测标签：&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;def predict_labels(self, dists, k=1):
+    &amp;quot;&amp;quot;&amp;quot;
+    Given a matrix of distances between test points and training points,
+    predict a label for each test point.
+
+    Input:
+    dists - A num_test x num_train array where dists[i, j] gives the distance
+            between the ith test point and the jth training point.
+
+    Output:
+    y - A vector of length num_test where y[i] is the predicted label for the
+        ith test point.
+    &amp;quot;&amp;quot;&amp;quot;
+    num_test = dists.shape[0]
+    y_pred = np.zeros(num_test)
+    for i in xrange(num_test):
+      # A list of length k storing the labels of the k nearest neighbors to
+      # the ith test point.
+      closest_y = []
+      #########################################################################
+      # TODO:                                                                 #
+      # Use the distance matrix to find the k nearest neighbors of the ith    #
+      # training point, and use self.y_train to find the labels of these      #
+      # neighbors. Store these labels in closest_y.                           #
+      # Hint: Look up the function numpy.argsort.                             #
+      #########################################################################
+      idx = np.argsort(dists[i, :])
+      closest_y = list(self.y_train[idx[0:k]])
+      #########################################################################
+      # TODO:                                                                 #
+      # Now that you have found the labels of the k nearest neighbors, you    #
+      # need to find the most common label in the list closest_y of labels.   #
+      # Store this label in y_pred[i]. Break ties by choosing the smaller     #
+      # label.                                                                #
+      #########################################################################
+      labelCount = {}
+      for j in xrange(k):
+        labelCount[closest_y[j]] = labelCount.get(closest_y[j], 0) + 1
+      sortedLabel = sorted(labelCount.iteritems(), key = lambda line:line[1], reverse = True)
+      y_pred[i] = sortedLabel[0][0]
+      #########################################################################
+      #                           END OF YOUR CODE                            # 
+      #########################################################################
+
+    return y_pred
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;再来说用到的距离的计算，这里采用欧氏距离来衡量测试样本&lt;code&gt;X&lt;/code&gt;和gallery数据&lt;code&gt;X_train&lt;/code&gt;。注意到&lt;code&gt;X - An num_test x dimension array where each row is a test point.&lt;/code&gt; 最终的dists应该是&lt;code&gt;num_test x num_train&lt;/code&gt;的矩阵，变换可以用下面一句代码得到。至此，KNN分类器完成。&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;dists = np.sqrt(np.dot((X**2), np.ones((np.transpose(self.X_train)).shape))\
+    + np.dot(np.ones(X.shape), np.transpose(self.X_train ** 2))\
+    - 2 * np.dot(X, np.transpose(self.X_train)))
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&quot;linear-classifier&quot;&gt;linear classifier&lt;/h2&gt;
+
+&lt;p&gt;这里只考虑softmax和linear svm两种分类器，统一封装为一个类。需要补全 &lt;code&gt;train&lt;/code&gt; 与 &lt;code&gt;predict&lt;/code&gt; 两部分。&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;import numpy as np
+from cs231n.classifiers.linear_svm import *
+from cs231n.classifiers.softmax import *
+
+class LinearClassifier:
+
+  def __init__(self):
+    self.W = None
+
+  def train(self, X, y, learning_rate=1e-3, reg=1e-5, num_iters=100,
+            batch_size=200, verbose=False):
+    &amp;quot;&amp;quot;&amp;quot;
+    Train this linear classifier using stochastic gradient descent.
+
+    Inputs:
+    - X: D x N array of training data. Each training point is a D-dimensional
+         column.
+    - y: 1-dimensional array of length N with labels 0...K-1, for K classes.
+    - learning_rate: (float) learning rate for optimization.
+    - reg: (float) regularization strength.
+    - num_iters: (integer) number of steps to take when optimizing
+    - batch_size: (integer) number of training examples to use at each step.
+    - verbose: (boolean) If true, print progress during optimization.
+
+    Outputs:
+    A list containing the value of the loss function at each training iteration.
+    &amp;quot;&amp;quot;&amp;quot;
+    dim, num_train = X.shape
+    num_classes = np.max(y) + 1 # assume y takes values 0...K-1 where K is number of classes
+    if self.W is None:
+      # lazily initialize W
+      self.W = np.random.randn(num_classes, dim) * 0.001
+
+    # Run stochastic gradient descent to optimize W
+    loss_history = []
+    for it in xrange(num_iters):
+      X_batch = None
+      y_batch = None
+
+      #########################################################################
+      # TODO:                                                                 #
+      # Sample batch_size elements from the training data and their           #
+      # corresponding labels to use in this round of gradient descent.        #
+      # Store the data in X_batch and their corresponding labels in           #
+      # y_batch; after sampling X_batch should have shape (dim, batch_size)   #
+      # and y_batch should have shape (batch_size,)                           #
+      #                                                                       #
+      # Hint: Use np.random.choice to generate indices. Sampling with         #
+      # replacement is faster than sampling without replacement.              #
+      #########################################################################
+      sample_idx = np.random.choice(num_train, batch_size, replace = True)
+      X_batch = X[:, sample_idx]
+      y_batch = y[sample_idx]
+      #########################################################################
+      #                       END OF YOUR CODE                                #
+      #########################################################################
+
+      # evaluate loss and gradient
+      loss, grad = self.loss(X_batch, y_batch, reg)
+      loss_history.append(loss)
+
+      # perform parameter update
+      #########################################################################
+      # TODO:                                                                 #
+      # Update the weights using the gradient and the learning rate.          #
+      #########################################################################
+      self.W += -learning_rate*grad
+      #########################################################################
+      #                       END OF YOUR CODE                                #
+      #########################################################################
+
+      if verbose and it % 100 == 0:
+        print &amp;#39;iteration %d / %d: loss %f&amp;#39; % (it, num_iters, loss)
+
+    return loss_history
+
+  def predict(self, X):
+    &amp;quot;&amp;quot;&amp;quot;
+    Use the trained weights of this linear classifier to predict labels for
+    data points.
+
+    Inputs:
+    - X: D x N array of training data. Each column is a D-dimensional point.
+
+    Returns:
+    - y_pred: Predicted labels for the data in X. y_pred is a 1-dimensional
+      array of length N, and each element is an integer giving the predicted
+      class.
+    &amp;quot;&amp;quot;&amp;quot;
+    y_pred = np.zeros(X.shape[1])
+    ###########################################################################
+    # TODO:                                                                   #
+    # Implement this method. Store the predicted labels in y_pred.            #
+    ###########################################################################
+    y_pred = np.argmax(np.dot(self.W, X), axis = 0)
+    ###########################################################################
+    #                           END OF YOUR CODE                              #
+    ###########################################################################
+    return y_pred
+
+  def loss(self, X_batch, y_batch, reg):
+    &amp;quot;&amp;quot;&amp;quot;
+    Compute the loss function and its derivative. 
+    Subclasses will override this.
+
+    Inputs:
+    - X_batch: D x N array of data; each column is a data point.
+    - y_batch: 1-dimensional array of length N with labels 0...K-1, for K classes.
+    - reg: (float) regularization strength.
+
+    Returns: A tuple containing:
+    - loss as a single float
+    - gradient with respect to self.W; an array of the same shape as W
+    &amp;quot;&amp;quot;&amp;quot;
+    pass
+
+
+class LinearSVM(LinearClassifier):
+  &amp;quot;&amp;quot;&amp;quot; A subclass that uses the Multiclass SVM loss function &amp;quot;&amp;quot;&amp;quot;
+
+  def loss(self, X_batch, y_batch, reg):
+    return svm_loss_vectorized(self.W, X_batch, y_batch, reg)
+
+
+class Softmax(LinearClassifier):
+  &amp;quot;&amp;quot;&amp;quot; A subclass that uses the Softmax + Cross-entropy loss function &amp;quot;&amp;quot;&amp;quot;
+
+  def loss(self, X_batch, y_batch, reg):
+    return softmax_loss_vectorized(self.W, X_batch, y_batch, reg)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这里面SVM和softmax是基于基类线性分类器的类，并分别定义了loss函数。&lt;/p&gt;
+
+&lt;h3 id=&quot;svm-的loss-function-与-gradient-：&quot;&gt;SVM 的loss function 与 gradient ：&lt;/h3&gt;
+
+&lt;p&gt;loss function:
+$$L = \frac{1}{N} \sum_i \sum_ {y_i \ne j} \max( 0, \mathrm{f}(\mathrm{x} _ {i}, W) _ {j} - \mathrm{f}(\mathrm{x} _ {i}, W) _ {y_i} + 1 ) + \frac{\lambda}{2} \sum_k\sum_l W _ {k,l}^2 $$&lt;/p&gt;
+
+&lt;p&gt;gradient:
+$$ \nabla _ {\mathrm{w} _ j} L = \frac{1}{N} \sum_i \mathrm{1} \{\mathrm{w} _ {j} ^ {T} \mathrm{x} _ i - w _ {y_i}^T \mathrm{x} _ i + 1&amp;gt;0 \}\mathrm{x}_i + \lambda \mathrm{w} _ j$$&lt;/p&gt;
+
+&lt;p&gt;根据公式很容易实现代码：&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;import numpy as np
+from random import shuffle
+
+def svm_loss_naive(W, X, y, reg):
+  &amp;quot;&amp;quot;&amp;quot;
+  Structured SVM loss function, naive implementation (with loops)
+  Inputs:
+  - W: C x D array of weights
+  - X: D x N array of data. Data are D-dimensional columns
+  - y: 1-dimensional array of length N with labels 0...K-1, for K classes
+  - reg: (float) regularization strength
+  Returns:
+  a tuple of:
+  - loss as single float
+  - gradient with respect to weights W; an array of same shape as W
+  &amp;quot;&amp;quot;&amp;quot;
+  dW = np.zeros(W.shape) # initialize the gradient as zero
+
+  # compute the loss and the gradient
+  num_classes = W.shape[0]
+  num_train = X.shape[1]
+  loss = 0.0
+  for i in xrange(num_train):
+    scores = W.dot(X[:, i])
+    correct_class_score = scores[y[i]]
+    for j in xrange(num_classes):
+      if j == y[i]:
+        continue
+      margin = scores[j] - correct_class_score + 1 # note delta = 1
+      if margin &amp;gt; 0:
+        loss += margin
+        dW[j, :] += (X[:, i]).transpose()
+
+  # Right now the loss is a sum over all training examples, but we want it
+  # to be an average instead so we divide by num_train.
+  loss /= num_train
+  dW /= num_train
+
+  # Add regularization to the loss.
+  loss += 0.5 * reg * np.sum(W * W)
+  dW += reg * W
+
+  #############################################################################
+  # TODO:                                                                     #
+  # Compute the gradient of the loss function and store it dW.                #
+  # Rather that first computing the loss and then computing the derivative,   #
+  # it may be simpler to compute the derivative at the same time that the     #
+  # loss is being computed. As a result you may need to modify some of the    #
+  # code above to compute the gradient.                                       #
+  #############################################################################
+
+  return loss, dW
+
+
+def svm_loss_vectorized(W, X, y, reg):
+  &amp;quot;&amp;quot;&amp;quot;
+  Structured SVM loss function, vectorized implementation.
+
+  Inputs and outputs are the same as svm_loss_naive.
+  &amp;quot;&amp;quot;&amp;quot;
+  loss = 0.0
+  dW = np.zeros(W.shape) # initialize the gradient as zero
+
+  #############################################################################
+  # TODO:                                                                     #
+  # Implement a vectorized version of the structured SVM loss, storing the    #
+  # result in loss.                                                           #
+  #############################################################################
+  num_train = y.shape[0]
+  Y_hat = W.dot(X)
+  err_dist = Y_hat - Y_hat[tuple([y, range(num_train)])] + 1
+  err_dist[err_dist &amp;lt;= 0] = 0.0
+  err_dist[tuple([y, range(num_train)])] = 0.0
+  loss += np.sum(err_dist)/num_train
+  loss += 0.5 * reg * np.sum(W * W)
+  #############################################################################
+  #                             END OF YOUR CODE                              #
+  #############################################################################
+
+
+  #############################################################################
+  # TODO:                                                                     #
+  # Implement a vectorized version of the gradient for the structured SVM     #
+  # loss, storing the result in dW.                                           #
+  #                                                                           #
+  # Hint: Instead of computing the gradient from scratch, it may be easier    #
+  # to reuse some of the intermediate values that you used to compute the     #
+  # loss.                                                                     #
+  #############################################################################
+  err_dist[err_dist&amp;gt;0] = 1.0/num_train
+  dW += err_dist.dot(X.transpose()) + reg * W
+  #############################################################################
+  #                             END OF YOUR CODE                              #
+  #############################################################################
+
+  return loss, dW
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&quot;softmax的loss-function-与-gradient-：&quot;&gt;softmax的loss function 与 gradient ：&lt;/h3&gt;
+
+&lt;p&gt;loss function: 
+$$ L = \frac {1}{N} \sum_i \sum_j \mathrm{1}\{y_i=j \}\cdot \log(\frac{e^{\mathrm{f} _ j}}{\sum_m e^{\mathrm{f} _ m}}) + \frac{\lambda}{2} \sum_k\sum_l W _ {k,l}^2$$&lt;/p&gt;
+
+&lt;p&gt;gradient: 
+$$\nabla_{\mathrm{w} _ j} L = -\frac{1}{N} \sum_i \left[\mathrm{1} \{y_i=j\} - p(y_i=j|\mathrm{x} _ i;W)\right]\mathrm{x} _ i + \lambda \mathrm{w} _ j$$&lt;/p&gt;
+
+&lt;p&gt;其中 
+$$ p(y_i=j | \mathrm{x} _ {i}; W) = \frac{e^{\mathrm{f} _ j}} {\sum_m e^{\mathrm{f} _ m}}$$&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;import numpy as np
+from random import shuffle
+
+def softmax_loss_naive(W, X, y, reg):
+  &amp;quot;&amp;quot;&amp;quot;
+  Softmax loss function, naive implementation (with loops)
+  Inputs:
+  - W: C x D array of weights
+  - X: D x N array of data. Data are D-dimensional columns
+  - y: 1-dimensional array of length N with labels 0...K-1, for K classes
+  - reg: (float) regularization strength
+  Returns:
+  a tuple of:
+  - loss as single float
+  - gradient with respect to weights W, an array of same size as W
+  &amp;quot;&amp;quot;&amp;quot;
+  # Initialize the loss and gradient to zero.
+  loss = 0.0
+  dW = np.zeros_like(W)
+
+  #############################################################################
+  # TODO: Compute the softmax loss and its gradient using explicit loops.     #
+  # Store the loss in loss and the gradient in dW. If you are not careful     #
+  # here, it is easy to run into numeric instability. Don&amp;#39;t forget the        #
+  # regularization!                                                           #
+  #############################################################################
+  dim, num_data = X.shape
+  num_class = W.shape[0]
+  Y_hat = np.exp(np.dot(W, X))
+  prob = Y_hat / np.sum(Y_hat, axis = 0)
+
+  # C x N array, element(i,j)=1 if y[j]=i
+  ground_truth = np.zeros_like(prob)
+  ground_truth[tuple([y, range(len(y))])] = 1.0
+
+  for i in xrange(num_data):
+    for j in xrange(num_class):
+      loss += -(ground_truth[j, i] * np.log(prob[j, i]))/num_data
+      dW[j, :] += -(ground_truth[j, i] - prob[j, i])*(X[:,i]).transpose()/num_data
+  loss += 0.5*reg*np.sum(np.sum(W**2, axis = 0)) # reg term
+  dW += reg*W
+
+  #############################################################################
+  #                          END OF YOUR CODE                                 #
+  #############################################################################
+
+  return loss, dW
+
+
+def softmax_loss_vectorized(W, X, y, reg):
+  &amp;quot;&amp;quot;&amp;quot;
+  Softmax loss function, vectorized version.
+
+  Inputs and outputs are the same as softmax_loss_naive.
+  &amp;quot;&amp;quot;&amp;quot;
+  # Initialize the loss and gradient to zero.
+  loss = 0.0
+  dW = np.zeros_like(W)
+
+  #############################################################################
+  # TODO: Compute the softmax loss and its gradient using no explicit loops.  #
+  # Store the loss in loss and the gradient in dW. If you are not careful     #
+  # here, it is easy to run into numeric instability. Don&amp;#39;t forget the        #
+  # regularization!                                                           #
+  #############################################################################
+  dim, num_data = X.shape
+  Y_hat = np.exp(np.dot(W, X))
+  prob = Y_hat / np.sum(Y_hat, axis = 0)#probabilities
+
+  # C x N array, element(i,j)=1 if y[j]=i
+  ground_truth = np.zeros_like(prob)
+  ground_truth[tuple([y, range(len(y))])] = 1.0
+
+  loss = -np.sum(ground_truth*np.log(prob)) / num_data + 0.5*reg*np.sum(W*W)
+  dW = (-np.dot(ground_truth - prob, X.transpose()))/num_data + reg*W
+  #############################################################################
+  #                          END OF YOUR CODE                                 #
+  #############################################################################
+
+  return loss, dW
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;在相应ipython notebook上运行，测试三种分类器效果：
+KNN的测试结果（K=10）：
+&lt;img src=&quot;../images/posts/knn_acc.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;SVM测试结果：
+&lt;img src=&quot;../images/posts/svm_acc.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;Softmax测试结果：
+&lt;img src=&quot;../images/posts/softmax_acc.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+</description>
+      <pubDate>Sun, 18 Jan 2015 00:00:00 +0000</pubDate>
+      <link>/blog/simple-classifier-for-cs231n-assignments.html</link>
+      <guid isPermaLink="true">/blog/simple-classifier-for-cs231n-assignments.html</guid>
+    </item>
+    
+  </channel>
+</rss>

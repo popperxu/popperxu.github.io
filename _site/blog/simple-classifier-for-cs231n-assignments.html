@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google-site-verification" content="aexITLS38FdIRzwj25OVWxm87rpa9l-UV0URTyC9cTs" />
+  <title>
+    简单分类器的python代码实现
+    
+  </title>
+  <link rel="stylesheet" href="../css/site.css">
+
+  <!-- highlight settings-->
+  <link rel="stylesheet" href="http://yandex.st/highlightjs/7.1/styles/default.min.css">
+<script src="http://yandex.st/highlightjs/7.1/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+  <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+  
+  <link rel="alternate" type="application/atom+xml" title="RSS Feed for Karen's blog" href="/feed.xml" />
+
+  
+
+  
+
+  
+</head>
+<body>
+  <div class="top-bar">
+  </div>
+
+  <div class="header-container">
+    <header class="inner">
+      
+      <nav>
+        <a class="" href="/">About</a>
+        <a class="" href="/project/">Project</a>
+        <!--<a class="" href="/resume/">Resume</a>-->
+        <!--<a href="/resume/">Resume</a>-->
+        <a class="" href="/publication/">Publication</a>
+        <a class="" href="/blog/">Blog</a>
+        <a href="/reading/">Reading</a>
+        <!--<a class=" contact" href="/contact/">Contact</a>-->
+        <a href="https://github.com/yyjiang">Github</a>
+      </nav>
+      
+      
+      <div class="pull-right right logo">
+        <div class="name">
+          <a href="/">Karen</a><br />
+          <small>
+            <em>
+              
+                <a href="/">Keep Going</a>
+              
+            </em>
+          </small>
+        </div>
+        <img class="avatar" src="/images/photo.jpg" alt="My profile picture" />
+      </div>
+      <div class="clear"></div>
+    </header>
+    <div class="clear"></div>
+  </div>
+
+  <!--添加侧边菜单-->
+<!--link rel="stylesheet" href="/css/side-menu.css" />
+ <style>
+        .side-menu {
+            width: 200px;
+            top: 150px;
+            right: 0;
+        }
+ </style>
+<script type="text/javascript" src="/js/jquery.min.js"></script>
+<script type="text/javascript" src="/js/jquery.side.menu.js"></script>
+<script>
+$(function () {
+            $('#main').sideMenu({
+                hs: ['h2']
+            });
+        });
+</script>-->
+
+
+
+<article>
+  <h1 class="inner">
+    简单分类器的python代码实现
+  </h1>
+
+  <p class="meta">18 Jan 2015</p>
+
+  
+  
+  <div id="menu"></div>
+  <div id="main" class="span9">
+  <div class="post">
+    <p>本文是stanford大学课程：<a href="http://vision.stanford.edu/teaching/cs231n/">Convolutional Neural Networks for Visual Recognition</a> 的一些笔记与第一次作业。主要内容为简单（多类）分类器的实现：KNN, SVM, softmax。</p>
+
+<p>softmax与SVM的一点区别，其中一张PPT说明：
+<img src="../images/posts/softmax.png" alt=""></p>
+
+<p>分类器实现的训练步骤三步走：</p>
+
+<ul>
+<li>计算 score matrix</li>
+<li>基于 score matrix 与真实标签计算代价函数cost function/ loss function</li>
+<li>由cost function对分类器参数求导，计算最优参数 （KNN不需要）</li>
+</ul>
+
+<h2 id="knn-分类器">KNN 分类器</h2>
+
+<p>KNN分类器封装为一个类，包括常规的函数<code>__init__</code>, <code>train</code>, <code>predict</code>以及一些别的重要函数。KNN不需要训练，因此<code>train</code>只是存下gallery数据和标签：</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">def train(self, X, y):
+    &quot;&quot;&quot;
+    Train the classifier. For k-nearest neighbors this is just 
+    memorizing the training data.
+
+    Input:
+    X - A num_train x dimension array where each row is a training point.
+    y - A vector of length num_train, where y[i] is the label for X[i, :]
+    &quot;&quot;&quot;
+    self.X_train = X
+    self.y_train = y
+</code></pre></div>
+<p>对于KNN来说，预测分类，最主要的就是距离的定义与计算，得到一个距离矩阵或者称为得分矩阵score。然后根据score排序得到最相似的K个样本，采取某种策略由该K个样本的类别决定测试样本的标签。</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">def predict(self, X, k=1, num_loops=0):
+    &quot;&quot;&quot;
+    Predict labels for test data using this classifier.
+
+    Input:
+    X - A num_test x dimension array where each row is a test point.
+    k - The number of nearest neighbors that vote for predicted label
+    num_loops - Determines which method to use to compute distances
+                between training points and test points.
+
+    Output:
+    y - A vector of length num_test, where y[i] is the predicted label for the
+        test point X[i, :].
+    &quot;&quot;&quot;
+    if num_loops == 0:
+      dists = self.compute_distances_no_loops(X)
+    elif num_loops == 1:
+      dists = self.compute_distances_one_loop(X)
+    elif num_loops == 2:
+      dists = self.compute_distances_two_loops(X)
+    else:
+      raise ValueError(&#39;Invalid value %d for num_loops&#39; % num_loops)
+
+    return self.predict_labels(dists, k=k)
+</code></pre></div>
+<p>其中<code>predict_labels</code>函数是由距离dists和k个近邻得到预测标签：</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">def predict_labels(self, dists, k=1):
+    &quot;&quot;&quot;
+    Given a matrix of distances between test points and training points,
+    predict a label for each test point.
+
+    Input:
+    dists - A num_test x num_train array where dists[i, j] gives the distance
+            between the ith test point and the jth training point.
+
+    Output:
+    y - A vector of length num_test where y[i] is the predicted label for the
+        ith test point.
+    &quot;&quot;&quot;
+    num_test = dists.shape[0]
+    y_pred = np.zeros(num_test)
+    for i in xrange(num_test):
+      # A list of length k storing the labels of the k nearest neighbors to
+      # the ith test point.
+      closest_y = []
+      #########################################################################
+      # TODO:                                                                 #
+      # Use the distance matrix to find the k nearest neighbors of the ith    #
+      # training point, and use self.y_train to find the labels of these      #
+      # neighbors. Store these labels in closest_y.                           #
+      # Hint: Look up the function numpy.argsort.                             #
+      #########################################################################
+      idx = np.argsort(dists[i, :])
+      closest_y = list(self.y_train[idx[0:k]])
+      #########################################################################
+      # TODO:                                                                 #
+      # Now that you have found the labels of the k nearest neighbors, you    #
+      # need to find the most common label in the list closest_y of labels.   #
+      # Store this label in y_pred[i]. Break ties by choosing the smaller     #
+      # label.                                                                #
+      #########################################################################
+      labelCount = {}
+      for j in xrange(k):
+        labelCount[closest_y[j]] = labelCount.get(closest_y[j], 0) + 1
+      sortedLabel = sorted(labelCount.iteritems(), key = lambda line:line[1], reverse = True)
+      y_pred[i] = sortedLabel[0][0]
+      #########################################################################
+      #                           END OF YOUR CODE                            # 
+      #########################################################################
+
+    return y_pred
+</code></pre></div>
+<p>再来说用到的距离的计算，这里采用欧氏距离来衡量测试样本<code>X</code>和gallery数据<code>X_train</code>。注意到<code>X - An num_test x dimension array where each row is a test point.</code> 最终的dists应该是<code>num_test x num_train</code>的矩阵，变换可以用下面一句代码得到。至此，KNN分类器完成。</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">dists = np.sqrt(np.dot((X**2), np.ones((np.transpose(self.X_train)).shape))\
+    + np.dot(np.ones(X.shape), np.transpose(self.X_train ** 2))\
+    - 2 * np.dot(X, np.transpose(self.X_train)))
+</code></pre></div>
+<h2 id="linear-classifier">linear classifier</h2>
+
+<p>这里只考虑softmax和linear svm两种分类器，统一封装为一个类。需要补全 <code>train</code> 与 <code>predict</code> 两部分。</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">import numpy as np
+from cs231n.classifiers.linear_svm import *
+from cs231n.classifiers.softmax import *
+
+class LinearClassifier:
+
+  def __init__(self):
+    self.W = None
+
+  def train(self, X, y, learning_rate=1e-3, reg=1e-5, num_iters=100,
+            batch_size=200, verbose=False):
+    &quot;&quot;&quot;
+    Train this linear classifier using stochastic gradient descent.
+
+    Inputs:
+    - X: D x N array of training data. Each training point is a D-dimensional
+         column.
+    - y: 1-dimensional array of length N with labels 0...K-1, for K classes.
+    - learning_rate: (float) learning rate for optimization.
+    - reg: (float) regularization strength.
+    - num_iters: (integer) number of steps to take when optimizing
+    - batch_size: (integer) number of training examples to use at each step.
+    - verbose: (boolean) If true, print progress during optimization.
+
+    Outputs:
+    A list containing the value of the loss function at each training iteration.
+    &quot;&quot;&quot;
+    dim, num_train = X.shape
+    num_classes = np.max(y) + 1 # assume y takes values 0...K-1 where K is number of classes
+    if self.W is None:
+      # lazily initialize W
+      self.W = np.random.randn(num_classes, dim) * 0.001
+
+    # Run stochastic gradient descent to optimize W
+    loss_history = []
+    for it in xrange(num_iters):
+      X_batch = None
+      y_batch = None
+
+      #########################################################################
+      # TODO:                                                                 #
+      # Sample batch_size elements from the training data and their           #
+      # corresponding labels to use in this round of gradient descent.        #
+      # Store the data in X_batch and their corresponding labels in           #
+      # y_batch; after sampling X_batch should have shape (dim, batch_size)   #
+      # and y_batch should have shape (batch_size,)                           #
+      #                                                                       #
+      # Hint: Use np.random.choice to generate indices. Sampling with         #
+      # replacement is faster than sampling without replacement.              #
+      #########################################################################
+      sample_idx = np.random.choice(num_train, batch_size, replace = True)
+      X_batch = X[:, sample_idx]
+      y_batch = y[sample_idx]
+      #########################################################################
+      #                       END OF YOUR CODE                                #
+      #########################################################################
+
+      # evaluate loss and gradient
+      loss, grad = self.loss(X_batch, y_batch, reg)
+      loss_history.append(loss)
+
+      # perform parameter update
+      #########################################################################
+      # TODO:                                                                 #
+      # Update the weights using the gradient and the learning rate.          #
+      #########################################################################
+      self.W += -learning_rate*grad
+      #########################################################################
+      #                       END OF YOUR CODE                                #
+      #########################################################################
+
+      if verbose and it % 100 == 0:
+        print &#39;iteration %d / %d: loss %f&#39; % (it, num_iters, loss)
+
+    return loss_history
+
+  def predict(self, X):
+    &quot;&quot;&quot;
+    Use the trained weights of this linear classifier to predict labels for
+    data points.
+
+    Inputs:
+    - X: D x N array of training data. Each column is a D-dimensional point.
+
+    Returns:
+    - y_pred: Predicted labels for the data in X. y_pred is a 1-dimensional
+      array of length N, and each element is an integer giving the predicted
+      class.
+    &quot;&quot;&quot;
+    y_pred = np.zeros(X.shape[1])
+    ###########################################################################
+    # TODO:                                                                   #
+    # Implement this method. Store the predicted labels in y_pred.            #
+    ###########################################################################
+    y_pred = np.argmax(np.dot(self.W, X), axis = 0)
+    ###########################################################################
+    #                           END OF YOUR CODE                              #
+    ###########################################################################
+    return y_pred
+
+  def loss(self, X_batch, y_batch, reg):
+    &quot;&quot;&quot;
+    Compute the loss function and its derivative. 
+    Subclasses will override this.
+
+    Inputs:
+    - X_batch: D x N array of data; each column is a data point.
+    - y_batch: 1-dimensional array of length N with labels 0...K-1, for K classes.
+    - reg: (float) regularization strength.
+
+    Returns: A tuple containing:
+    - loss as a single float
+    - gradient with respect to self.W; an array of the same shape as W
+    &quot;&quot;&quot;
+    pass
+
+
+class LinearSVM(LinearClassifier):
+  &quot;&quot;&quot; A subclass that uses the Multiclass SVM loss function &quot;&quot;&quot;
+
+  def loss(self, X_batch, y_batch, reg):
+    return svm_loss_vectorized(self.W, X_batch, y_batch, reg)
+
+
+class Softmax(LinearClassifier):
+  &quot;&quot;&quot; A subclass that uses the Softmax + Cross-entropy loss function &quot;&quot;&quot;
+
+  def loss(self, X_batch, y_batch, reg):
+    return softmax_loss_vectorized(self.W, X_batch, y_batch, reg)
+</code></pre></div>
+<p>这里面SVM和softmax是基于基类线性分类器的类，并分别定义了loss函数。</p>
+
+<h3 id="svm-的loss-function-与-gradient-：">SVM 的loss function 与 gradient ：</h3>
+
+<p>loss function:
+$$L = \frac{1}{N} \sum_i \sum_ {y_i \ne j} \max( 0, \mathrm{f}(\mathrm{x} _ {i}, W) _ {j} - \mathrm{f}(\mathrm{x} _ {i}, W) _ {y_i} + 1 ) + \frac{\lambda}{2} \sum_k\sum_l W _ {k,l}^2 $$</p>
+
+<p>gradient:
+$$ \nabla _ {\mathrm{w} _ j} L = \frac{1}{N} \sum_i \mathrm{1} \{\mathrm{w} _ {j} ^ {T} \mathrm{x} _ i - w _ {y_i}^T \mathrm{x} _ i + 1&gt;0 \}\mathrm{x}_i + \lambda \mathrm{w} _ j$$</p>
+
+<p>根据公式很容易实现代码：</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">import numpy as np
+from random import shuffle
+
+def svm_loss_naive(W, X, y, reg):
+  &quot;&quot;&quot;
+  Structured SVM loss function, naive implementation (with loops)
+  Inputs:
+  - W: C x D array of weights
+  - X: D x N array of data. Data are D-dimensional columns
+  - y: 1-dimensional array of length N with labels 0...K-1, for K classes
+  - reg: (float) regularization strength
+  Returns:
+  a tuple of:
+  - loss as single float
+  - gradient with respect to weights W; an array of same shape as W
+  &quot;&quot;&quot;
+  dW = np.zeros(W.shape) # initialize the gradient as zero
+
+  # compute the loss and the gradient
+  num_classes = W.shape[0]
+  num_train = X.shape[1]
+  loss = 0.0
+  for i in xrange(num_train):
+    scores = W.dot(X[:, i])
+    correct_class_score = scores[y[i]]
+    for j in xrange(num_classes):
+      if j == y[i]:
+        continue
+      margin = scores[j] - correct_class_score + 1 # note delta = 1
+      if margin &gt; 0:
+        loss += margin
+        dW[j, :] += (X[:, i]).transpose()
+
+  # Right now the loss is a sum over all training examples, but we want it
+  # to be an average instead so we divide by num_train.
+  loss /= num_train
+  dW /= num_train
+
+  # Add regularization to the loss.
+  loss += 0.5 * reg * np.sum(W * W)
+  dW += reg * W
+
+  #############################################################################
+  # TODO:                                                                     #
+  # Compute the gradient of the loss function and store it dW.                #
+  # Rather that first computing the loss and then computing the derivative,   #
+  # it may be simpler to compute the derivative at the same time that the     #
+  # loss is being computed. As a result you may need to modify some of the    #
+  # code above to compute the gradient.                                       #
+  #############################################################################
+
+  return loss, dW
+
+
+def svm_loss_vectorized(W, X, y, reg):
+  &quot;&quot;&quot;
+  Structured SVM loss function, vectorized implementation.
+
+  Inputs and outputs are the same as svm_loss_naive.
+  &quot;&quot;&quot;
+  loss = 0.0
+  dW = np.zeros(W.shape) # initialize the gradient as zero
+
+  #############################################################################
+  # TODO:                                                                     #
+  # Implement a vectorized version of the structured SVM loss, storing the    #
+  # result in loss.                                                           #
+  #############################################################################
+  num_train = y.shape[0]
+  Y_hat = W.dot(X)
+  err_dist = Y_hat - Y_hat[tuple([y, range(num_train)])] + 1
+  err_dist[err_dist &lt;= 0] = 0.0
+  err_dist[tuple([y, range(num_train)])] = 0.0
+  loss += np.sum(err_dist)/num_train
+  loss += 0.5 * reg * np.sum(W * W)
+  #############################################################################
+  #                             END OF YOUR CODE                              #
+  #############################################################################
+
+
+  #############################################################################
+  # TODO:                                                                     #
+  # Implement a vectorized version of the gradient for the structured SVM     #
+  # loss, storing the result in dW.                                           #
+  #                                                                           #
+  # Hint: Instead of computing the gradient from scratch, it may be easier    #
+  # to reuse some of the intermediate values that you used to compute the     #
+  # loss.                                                                     #
+  #############################################################################
+  err_dist[err_dist&gt;0] = 1.0/num_train
+  dW += err_dist.dot(X.transpose()) + reg * W
+  #############################################################################
+  #                             END OF YOUR CODE                              #
+  #############################################################################
+
+  return loss, dW
+</code></pre></div>
+<h3 id="softmax的loss-function-与-gradient-：">softmax的loss function 与 gradient ：</h3>
+
+<p>loss function: 
+$$ L = \frac {1}{N} \sum_i \sum_j \mathrm{1}\{y_i=j \}\cdot \log(\frac{e^{\mathrm{f} _ j}}{\sum_m e^{\mathrm{f} _ m}}) + \frac{\lambda}{2} \sum_k\sum_l W _ {k,l}^2$$</p>
+
+<p>gradient: 
+$$\nabla_{\mathrm{w} _ j} L = -\frac{1}{N} \sum_i \left[\mathrm{1} \{y_i=j\} - p(y_i=j|\mathrm{x} _ i;W)\right]\mathrm{x} _ i + \lambda \mathrm{w} _ j$$</p>
+
+<p>其中 
+$$ p(y_i=j | \mathrm{x} _ {i}; W) = \frac{e^{\mathrm{f} _ j}} {\sum_m e^{\mathrm{f} _ m}}$$</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">import numpy as np
+from random import shuffle
+
+def softmax_loss_naive(W, X, y, reg):
+  &quot;&quot;&quot;
+  Softmax loss function, naive implementation (with loops)
+  Inputs:
+  - W: C x D array of weights
+  - X: D x N array of data. Data are D-dimensional columns
+  - y: 1-dimensional array of length N with labels 0...K-1, for K classes
+  - reg: (float) regularization strength
+  Returns:
+  a tuple of:
+  - loss as single float
+  - gradient with respect to weights W, an array of same size as W
+  &quot;&quot;&quot;
+  # Initialize the loss and gradient to zero.
+  loss = 0.0
+  dW = np.zeros_like(W)
+
+  #############################################################################
+  # TODO: Compute the softmax loss and its gradient using explicit loops.     #
+  # Store the loss in loss and the gradient in dW. If you are not careful     #
+  # here, it is easy to run into numeric instability. Don&#39;t forget the        #
+  # regularization!                                                           #
+  #############################################################################
+  dim, num_data = X.shape
+  num_class = W.shape[0]
+  Y_hat = np.exp(np.dot(W, X))
+  prob = Y_hat / np.sum(Y_hat, axis = 0)
+
+  # C x N array, element(i,j)=1 if y[j]=i
+  ground_truth = np.zeros_like(prob)
+  ground_truth[tuple([y, range(len(y))])] = 1.0
+
+  for i in xrange(num_data):
+    for j in xrange(num_class):
+      loss += -(ground_truth[j, i] * np.log(prob[j, i]))/num_data
+      dW[j, :] += -(ground_truth[j, i] - prob[j, i])*(X[:,i]).transpose()/num_data
+  loss += 0.5*reg*np.sum(np.sum(W**2, axis = 0)) # reg term
+  dW += reg*W
+
+  #############################################################################
+  #                          END OF YOUR CODE                                 #
+  #############################################################################
+
+  return loss, dW
+
+
+def softmax_loss_vectorized(W, X, y, reg):
+  &quot;&quot;&quot;
+  Softmax loss function, vectorized version.
+
+  Inputs and outputs are the same as softmax_loss_naive.
+  &quot;&quot;&quot;
+  # Initialize the loss and gradient to zero.
+  loss = 0.0
+  dW = np.zeros_like(W)
+
+  #############################################################################
+  # TODO: Compute the softmax loss and its gradient using no explicit loops.  #
+  # Store the loss in loss and the gradient in dW. If you are not careful     #
+  # here, it is easy to run into numeric instability. Don&#39;t forget the        #
+  # regularization!                                                           #
+  #############################################################################
+  dim, num_data = X.shape
+  Y_hat = np.exp(np.dot(W, X))
+  prob = Y_hat / np.sum(Y_hat, axis = 0)#probabilities
+
+  # C x N array, element(i,j)=1 if y[j]=i
+  ground_truth = np.zeros_like(prob)
+  ground_truth[tuple([y, range(len(y))])] = 1.0
+
+  loss = -np.sum(ground_truth*np.log(prob)) / num_data + 0.5*reg*np.sum(W*W)
+  dW = (-np.dot(ground_truth - prob, X.transpose()))/num_data + reg*W
+  #############################################################################
+  #                          END OF YOUR CODE                                 #
+  #############################################################################
+
+  return loss, dW
+</code></pre></div>
+<p>在相应ipython notebook上运行，测试三种分类器效果：
+KNN的测试结果（K=10）：
+<img src="../images/posts/knn_acc.png" alt=""></p>
+
+<p>SVM测试结果：
+<img src="../images/posts/svm_acc.png" alt=""></p>
+
+<p>Softmax测试结果：
+<img src="../images/posts/softmax_acc.png" alt=""></p>
+
+  </div>
+  </div>
+</article>
+
+<section class="comments inner">
+<!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_renren"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+</section>
+
+<section class="post-footer-self-promotion inner">
+  <h3>最近文章</h3>
+  <ul class="posts">
+    
+    <li>
+      <span>07 Oct 2015 &raquo;</span> <a href="/blog/using-opencv-with-Xcode-or-in-command-line.html">在Mac上安装并使用opencv2和opencv3</a>
+    </li>
+    
+    <li>
+      <span>07 Oct 2015 &raquo;</span> <a href="/blog/some-tips-with-Xcode.html">Xcode的一些小使用记录</a>
+    </li>
+    
+    <li>
+      <span>30 Sep 2015 &raquo;</span> <a href="/blog/writing-chinese-onto-images-using-putText-and-freetype.html">在图像上写入中英文字符串的几个方法</a>
+    </li>
+    
+  </ul>
+</section>
+
+<!-- mathjax -->
+<script src="/public/js/bootstrap.min.js"></script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/javascript">
+  $(function(){
+    $("p:has(img), p:has(embed)").css('text-align', 'center');
+    $(".post-wrapper .entry a, .post-content a").not(".more-link.btn").attr('target', '_blank');
+  });
+</script>
+
+<div class="separator"></div>
+<section class="comments inner">
+<!-- Duoshuo Comment BEGIN -->
+	<div class="ds-thread"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"yyjiang"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = 'http://static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		|| document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- Duoshuo Comment END -->
+
+<!-- Disqus Comment BEGIN -->
+  <!--<div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'yongyuan'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>-->
+<!-- Disqus Comment END -->
+
+</section>
+
+  <div class="separator"></div>
+
+  <div  style="border-bottom: 1px solid #ddd"></div>
+    <footer>
+    <p class="linkings">
+        Utils: <a href="http://docs.opencv.org/doc/tutorials/tutorials.html">opencv</a>&nbsp&nbsp&nbsp&nbsp<a href="http://scikit-learn.org/stable/index.html">scikit-learn</a>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<a href="http://scikit-image.org/">scikit-image</a>
+    </p>
+    <p>
+      &copy; Karen Jiang, Since Sept. 2015.
+      Powered by <a href="http://jekyllrb.com/">Jekyll</a> |
+      Hosted by <a href="https://github.com">Github Pages</a>. 
+    </p>
+    <ul class="links">
+      <li>
+        <a href="https://github.com/yyjiang" title="See my code on GitHub">
+          <i class="icon-github"></i>
+        </a>
+      </li>	  
+      <li>
+        <a href="https://twitter.com/intent/follow?screen_name=yinyan_jiang" title="Follow me on Twitter">
+          <i class="icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a href="/feed.xml" title="Subscribe to my blog with RSS">
+          <i class="icon-feed"></i>
+        </a>
+      </li>
+    </ul>
+  </footer>
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-67985565-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+    /*!
+     * http://github.com/ssaunier/track-outbound-links
+     * Copyright 2013 Sébastien Saunier
+     * @license MIT
+     */
+    !function(e,t){function n(){for(var n=t.getElementsByTagName("a"),a=[],r=0;r<n.length;++r){var o=n[r];o.host!=e.location.host&&a.push(o)}return a}function a(n){for(var a=n.srcElement||n.target;a&&("undefined"==typeof a.tagName||"a"!=a.tagName.toLowerCase()||!a.href);)a=a.parentNode;a&&a.href&&(e._gaq&&_gaq.push(["_trackEvent","Outbound link","Click",a.href]),(!a.target||a.target.match(/^_(self|parent|top)$/i))&&(setTimeout(function(){t.location.href=a.href},150),n.preventDefault?n.preventDefault():n.returnValue=!1))}e.addEventListener("load",function(){var e=n();for(var t in e)e[t].addEventListener("click",a)})}(window,document);
+    var links = document.links;
+    for (var i = 0, linksLength = links.length; i < linksLength; i++) {
+       if (links[i].hostname != window.location.hostname) { links[i].target = '_blank'; }
+    }
+
+    /*
+     * Detect if we are included in an iframe => move.
+     */
+    if (window.top !== window.self
+        && !window.self.location.href.match(/headsha\.re/))
+    {
+      window.top.location.replace(window.self.location.href);
+    }
+  </script>
+
+
+</body>
+</html>
