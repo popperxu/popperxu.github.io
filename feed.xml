@@ -6,7 +6,7 @@ layout: none
   <channel>
     <title>Karen - Blog</title>
     <description>On Software Engineering, Lean Startup, Agile and Productivity</description>
-    <link>http://yyjiang.github.io</link>
+    <link>http://popperxu.github.io</link>
     <atom:link href="{{ site.url }}/feed.xml" rel="self" type="application/rss+xml" />
     {% for post in site.posts limit:25 %}
     <item>
